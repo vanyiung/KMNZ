@@ -1,0 +1,453 @@
+/* 基本样式（移动优先） */
+:root{
+  --max-width:1000px;
+  --accent:#1e88e5;
+  --muted:#666;
+  --bg:#ffffff;
+  --surface:#ffffff;
+  --text:#222222;
+  --border:#eee;
+  --hero-overlay:rgba(0,0,0,0.36);
+  --hero-foreground:#ffffff;
+}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;line-height:1.6;margin:0;color:var(--text);background:var(--bg)}
+.container{max-width:var(--max-width);margin:0 auto;padding:0 16px}
+.site-header{background:var(--surface);border-bottom:1px solid var(--border)}
+.site-header .container{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+.site-title{margin:0;font-size:1.2rem}
+.site-nav{display:none}
+.site-nav a{margin-left:12px;color:var(--muted);text-decoration:none}
+.nav-toggle{background:transparent;border:0;font-size:1.2rem}
+.hero{padding:24px 0}
+
+/* 导航中的认证按钮与用户信息 */
+.nav-auth-btn{
+  margin-left:12px;
+  background:transparent;
+  border:1px solid rgba(0,0,0,0.08);
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  color:var(--muted);
+}
+.nav-auth-btn:hover{background:rgba(0,0,0,0.03)}
+.nav-user{display:inline-flex;align-items:center;gap:8px;margin-left:12px}
+.nav-user img{width:32px;height:32px;border-radius:50%;object-fit:cover;display:block}
+.nav-user #nav-user-id{font-weight:600;color:var(--muted);font-size:0.95rem}
+.nav-signout{background:transparent;border:0;color:var(--muted);cursor:pointer;padding:4px 6px;border-radius:4px}
+.nav-signout:hover{background:rgba(0,0,0,0.04)}
+
+/* 用户菜单下拉 */
+.nav-user{position:relative}
+.nav-user .user-menu{position:absolute;right:0;top:calc(100% + 8px);background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.08);min-width:160px;padding:6px;display:none}
+.nav-user .user-menu a,.nav-user .user-menu button{display:block;padding:8px 10px;text-align:left;border:0;background:transparent;width:100%;cursor:pointer;color:var(--text);text-decoration:none}
+.nav-user .user-menu a:hover,.nav-user .user-menu button:hover{background:rgba(0,0,0,0.04)}
+.nav-user.open .user-menu{display:block}
+
+/* 头像编辑模态 */
+.avatar-modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);z-index:2000}
+.avatar-modal .modal-card{background:var(--surface);padding:18px;border-radius:10px;width:min(520px,94%);box-shadow:0 12px 40px rgba(0,0,0,0.25)}
+.avatar-modal .preview{width:120px;height:120px;border-radius:50%;overflow:hidden;margin:8px auto;border:1px solid #eee}
+.avatar-modal .preview img{width:100%;height:100%;object-fit:cover}
+.avatar-modal .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+.avatar-modal input[type=file]{display:block}
+/* Hero 背景图：默认使用背景图，移动端显示 img 备用元素 */
+.hero{position:relative;color:var(--hero-foreground);background-color:var(--bg);background-image:url("../assets/images/kmnz.jpg");background-size:cover;background-position:center 35%;min-height:420px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:48px 0}
+.hero{--hero-overlay:var(--hero-overlay)}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(var(--hero-overlay),var(--hero-overlay));pointer-events:none}
+.hero > *{position:relative;z-index:1}
+.hero h2{color:var(--hero-foreground);margin:0 0 8px;font-size:1.6rem}
+.hero p{color:var(--hero-foreground);max-width:720px}
+.hero-image{display:none;width:100%;height:auto;border-radius:6px;object-fit:cover;max-height:520px;object-position:center top}
+.posts-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.post-card{border:1px solid var(--border);padding:12px;border-radius:6px;background:var(--surface)}
+.site-footer{padding:12px 0;margin-top:24px;color:var(--muted);font-size:0.9rem;text-align:center;background:var(--surface)}
+/* 表单 */
+form label{display:block;margin-bottom:8px}
+input,textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text)}
+button{background:var(--accent);color:#fff;padding:8px 14px;border:0;border-radius:4px;cursor:pointer}
+/* 清除头像按钮：提高对比、可读性与键盘可见焦点 */
+.btn-clear-avatar{
+  background:#ffffff;
+  color:#222;
+  border:1px solid rgba(0,0,0,0.12);
+  padding:6px 10px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:0.95rem;
+}
+.btn-clear-avatar:hover{background:#f5f5f5}
+.btn-clear-avatar:focus{outline:3px solid rgba(30,136,229,0.16);box-shadow:0 0 0 4px rgba(30,136,229,0.08)}
+/* 大屏样式 */
+@media(min-width:700px){
+  .site-nav{display:block}
+  .nav-toggle{display:none}
+  .posts-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+/* 移动端：取消背景图，显示 img 元素以节省带宽并更好裁切 */
+@media(max-width:699px){
+  .hero{background-image:none;min-height:auto;padding:20px 0}
+  .hero-image{display:block}
+  .hero h2{color:#ffffff}
+  .hero p{color:#ffffff}
+}
+@media(min-width:1000px){
+  .posts-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* 成员页样式 */
+.members-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;align-items:center}
+.member-card{display:flex;flex-direction:column;align-items:center;text-align:center}
+.member-photo{width:180px;height:180px;border-radius:50%;overflow:hidden;display:block;transition:transform .25s ease,box-shadow .25s ease;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
+.member-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.member-photo:hover,.member-photo:focus,.member-photo.dragging{transform:scale(1.05)}
+.member-name{margin-top:10px;font-weight:600}
+
+@media(min-width:900px){
+  .members-grid{grid-template-columns:repeat(4,1fr)}
+  .member-photo{width:200px;height:200px}
+}
+
+/* 可点击可聚焦样式 */
+.member-link{outline:none;text-decoration:none;color:inherit}
+.member-link:focus .member-photo{box-shadow:0 10px 30px rgba(0,0,0,0.15);transform:scale(1.06)}
+
+/* 布局微调 */
+
+
+
+
+/* sr-only 辅助类 */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0,0,0,0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Skip-link 可见焦点样式（当获得焦点时显示） */
+.skip-link { position: absolute; left: -9999px; top: auto; }
+.skip-link:focus { left: 16px; top: 12px; z-index: 9999; background: #fff; padding: 8px 12px; border-radius:4px; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+
+/* Hero 轮播 */
+.hero-carousel { position: relative; width: 100%; max-height: 520px; overflow: hidden; }
+.hero-carousel .slides { list-style: none; margin: 0; padding: 0; position: relative; height: 100%; }
+.hero-carousel .slide { position: absolute; inset: 0; opacity: 0; transition: opacity .6s ease; display: flex; align-items: center; justify-content: center; }
+.hero-carousel .slide.active { opacity: 1; position: relative; }
+.hero-carousel .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.carousel-control {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0); color: #fff; border: 0; padding: 8px 12px; font-size: 28px; cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+.carousel-control.prev { left: 12px; }
+.carousel-control.next { right: 12px; }
+
+.carousel-indicators {
+  position: absolute; left: 50%; transform: translateX(-50%); bottom: 12px; display:flex; gap:8px;
+}
+.carousel-indicators .indicator {
+  width:10px; height:10px; border-radius:50%; background: rgba(255, 255, 255, 0); border: 0; cursor: pointer;
+}
+.carousel-indicators .indicator { width:12px; height:12px; border-radius:50%; background: rgba(255,255,255,0.35); border: 1px solid rgba(0,0,0,0.15); }
+.carousel-indicators .indicator.active { background: rgba(255,255,255,0.95); border-color: rgba(0,0,0,0.2); }
+
+/* 字母指示器样式（替代原点） */
+.carousel-indicators { display:flex; gap:8px; }
+.carousel-indicators .indicator {
+  width: auto;
+  height: auto;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.14);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 2px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.carousel-indicators .indicator.active {
+  background: rgba(255,255,255,0.95);
+  color: #111;
+  border-color: rgba(0,0,0,0.12);
+}
+
+/* 移动端微调 */
+@media (max-width: 600px) {
+  .hero-carousel { max-height: 320px; }
+  .carousel-control { font-size: 22px; padding:6px 10px; }
+}
+
+
+
+
+/* Layout: 让 hero 填满 header 与 footer 之间的剩余高度 */
+html, body { height: 100%; }
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+main.container { flex: 1; display: flex; flex-direction: column; }
+
+/* 让 hero 占满剩余高度（并允许通过 min-height 自动适配） */
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px 0;
+  min-height: 0; /* 允许父容器控制高度，防止固定 min-height 干扰 */
+}
+
+/* 使轮播内容填充 hero */
+.hero-carousel {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.hero-carousel .slides { position: relative; width: 100%; height: 100%; }
+.hero-carousel .slide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.hero-carousel .slide img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+
+
+/* 使 hero 横向全屏（破出 .container），同时用 .hero-inner 限制内容宽度 */
+.hero {
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+  box-sizing: border-box;
+  /* 保留背景与高度设置（如需可调整） */
+}
+
+.hero-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 48px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+/* 让轮播在内层垂直填充 */
+.hero-inner .hero-carousel {
+  flex: 1;
+  width: 100%;
+}
+.hero-inner h2, .hero-inner p { color: inherit; }
+
+
+.hero-carousel { position: relative; }
+.hero-carousel .slide { z-index: 1; }
+.carousel-control {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;               /* 保证在最上层 */
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  border: 0;
+  padding: 8px 12px;
+  font-size: 28px;
+  cursor: pointer;
+  display: block;
+}
+.carousel-control.prev { left: 12px; }
+.carousel-control.next { right: 12px; }
+
+/* 指示器也置顶 */
+.carousel-indicators { z-index: 999; position: absolute; bottom:12px; left:50%; transform:translateX(-50%); }
+.carousel-indicators .indicator { z-index: 1000; }
+
+/* Footer-overlap: 让 homepage hero 背景延伸到页脚上方并添加渐变过渡 */
+:root {
+  --footer-height: 80px; /* 可调：例如 60px / 100px */
+  --footer-overlap: var(--footer-height);
+  --site-header-height: 64px; /* 根据 header 实际高度调整 */
+}
+
+/* 对现有 .hero 添加负下边距以延伸背景（仅视觉效果） */
+.hero {
+  /* 默认较短的 hero，避免在非首页占用整个视口 */
+  margin-bottom: 0;
+  min-height: 420px;
+}
+
+/* 在 hero 底部添加渐变遮罩，平滑过渡到白色页脚 */
+.hero::after {
+  /* 移除过渡遮罩以避免在高度变化时出现白色空隙；如需保留渐变，可取消下列规则的注释并调整位置 */
+  content: none;
+}
+
+/* 确保 hero 内部内容叠放在遮罩之上 */
+.hero > * { z-index: 3; position: relative; }
+
+/* 让页脚置于最上层，显示在背景之上 */
+.site-footer {
+  position: relative;
+  z-index: 4;
+  background: #fff;
+  height: var(--footer-height);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 首页专用：让 hero 背景延伸到 footer 下方，footer 文本位于最底部并覆盖在背景之上 */
+body.home .hero {
+  /* 让 hero 在首页占满 header 与 footer 之间的可视高度，不使用负 margin */
+  margin-bottom: 0;
+  min-height: calc(100vh - var(--site-header-height) - var(--footer-height));
+  background-position: center bottom;
+}
+
+/* 去掉原先将伪元素放到负 bottom 的做法，保持 hero::after 不对内容布局产生影响 */
+body.home .hero::after { content: none; }
+
+/* 首页 footer 透明，使背景可见，同时保持文字可读 */
+body.home .site-footer {
+  background: transparent;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+}
+
+/* 确保 footer 文本始终在最底部（在 flex 布局下主容器已撑满） */
+body.home main.container { padding-bottom: 0; }
+
+:root{
+  --carousel-min: 320px;   /* 最小高度 */
+  --carousel-pref: 40vh;   /* 首选（响应式）高度 */
+  --carousel-max: 720px;   /* 最大高度 */
+}
+
+/* 让轮播在 header/footer 之间响应式高度 */
+.hero-carousel {
+  height: clamp(var(--carousel-min), var(--carousel-pref), var(--carousel-max));
+  max-height: none; /* 解除固定 max-height */
+}
+
+/* 图片填充并裁切，保持中心对齐 */
+.hero-carousel .slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform .45s ease;
+}
+
+/* 可选：鼠标悬停或激活时稍放大，营造缩放效果 */
+.hero-carousel .slide.active img,
+.hero-carousel .slide img:hover {
+  transform: scale(1.08);
+}
+
+/* Auth 页面样式 */
+.auth-page{display:flex;gap:0;align-items:stretch;padding:0;min-height:calc(100vh - var(--site-header-height) - var(--footer-height));}
+.auth-left{flex:0 0 50%;display:flex;align-items:stretch;justify-content:center}
+.auth-left img{width:100%;height:100%;display:block;object-fit:cover}
+.auth-right{flex:0 0 50%;background:var(--surface);padding:48px;border-radius:0;box-shadow:none;display:flex;align-items:center;justify-content:center}
+.auth-right{padding:36px;}
+.auth-right .auth-inner{width:100%;max-width:420px}
+.auth-right h2{margin-top:0}
+.auth-right .field{margin-bottom:12px}
+.auth-right .field label{display:block;font-size:0.95rem;margin-bottom:6px}
+.auth-right .field input[type="text"], .auth-right .field input[type="email"], .auth-right .field input[type="password"], .auth-right .field input[type="url"]{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;outline:none;background:var(--surface);color:var(--text)}
+.auth-right .field input:focus{border-color:var(--accent);box-shadow:0 6px 18px rgba(30,136,229,0.08)}
+.auth-right .help{font-size:0.85rem;color:var(--muted);margin-top:6px}
+.input-error{border-color:#e06a6a !important}
+.error-text{color:#c0392b;font-size:0.85rem;margin-top:6px}
+
+/* 密码强度条 */
+.password-strength{height:8px;background:var(--border);border-radius:6px;overflow:hidden;margin-top:6px}
+.password-strength > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,#f39c12,#27ae60)}
+.password-meta{font-size:0.85rem;color:#666;margin-top:6px}
+
+/* 头像上传控件 */
+.avatar-controls{display:flex;gap:8px;align-items:center}
+.avatar-preview-small{width:48px;height:48px;border-radius:50%;overflow:hidden;border:1px solid var(--border)}
+.avatar-preview-small img{width:100%;height:100%;object-fit:cover}
+.btn-clear-avatar{background:var(--surface);border:1px solid var(--border);padding:6px 8px;border-radius:6px;cursor:pointer}
+
+/* 成功提示 */
+.success-note{background:#e9f7ef;border:1px solid #c7efd5;padding:10px;border-radius:6px;color:#207a3b;margin-top:12px}
+
+@media(max-width:900px){
+  .auth-left{order:2;flex:none;height:200px}
+  .auth-right{order:1;flex:none;padding:20px}
+  .auth-right .auth-inner{max-width:none}
+}
+/* 主题切换按钮样式（通过 JS 注入到导航） */
+.theme-toggle{
+  margin-left:12px;
+  background:transparent;
+  border:1px solid var(--border);
+  padding:6px 8px;
+  border-radius:6px;
+  cursor:pointer;
+  color:var(--text);
+}
+.theme-toggle:focus{outline:3px solid rgba(30,136,229,0.12)}
+
+/* 暗色主题覆盖 */
+html[data-theme="dark"], body[data-theme="dark"] {
+  --bg:#0b1116;
+  --surface:#0f1720;
+  --text:#e6eef8;
+  --muted:#9aa6b2;
+  --border:rgba(255,255,255,0.06);
+  --accent:#59a6ff;
+  --hero-overlay:rgba(0,0,0,0.6);
+  --hero-foreground:#ffffff;
+}
+
+/* 让 header/footer 在暗色模式下视觉统一 */
+html[data-theme="dark"] .site-header{background:var(--surface)}
+html[data-theme="dark"] .site-footer{background:var(--surface);color:var(--muted)}
+
+/* 默认头像选择缩略图 */
+.default-avatars{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.default-avatar-thumb{width:64px;height:64px;border-radius:8px;overflow:hidden;object-fit:cover;cursor:pointer;border:2px solid transparent;display:block}
+.default-avatar-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.default-avatar-thumb.selected{border-color:var(--accent)}
+
+/* profile avatar circular */
+.profile-avatar{border-radius:50%;overflow:hidden}
+.profile-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+
+.auth-tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab-btn{flex:1;padding:8px 12px;border-radius:999px;border:1px solid #eee;background:transparent;cursor:pointer;color:var(--muted);transition:all .18s ease}
+.tab-btn:hover{background:rgba(0,0,0,0.03)}
+.tab-btn:focus{outline:2px solid rgba(30,136,229,0.18);outline-offset:2px}
+/* 选中使用 pill + 边框高亮（文字为主色），更好与浅色背景结合 */
+.tab-btn[aria-selected="true"], .tab-btn.active{
+  background:#fff;
+  color:var(--accent);
+  border:2px solid var(--accent);
+  box-shadow:0 8px 20px rgba(30,136,229,0.08);
+  padding:7px 11px;
+}
+.auth-panel label{display:block;margin-bottom:8px}
+.auth-panel input{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px}
+
+@media(max-width:900px){
+  .auth-page{flex-direction:column}
+  .auth-left{order:2;flex: none;height:240px}
+  .auth-left img{height:100%;object-position:center}
+  .auth-right{order:1;flex:none;padding:24px}
+}
