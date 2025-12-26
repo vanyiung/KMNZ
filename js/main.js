@@ -19,11 +19,24 @@ document.addEventListener('DOMContentLoaded', function(){
   // 主题初始化与切换（注入到导航）
   (function(){
     function applyTheme(t){
-      if(t === 'dark') document.documentElement.setAttribute('data-theme','dark');
+      var dark = (t === 'dark');
+      if(dark) document.documentElement.setAttribute('data-theme','dark');
       else document.documentElement.removeAttribute('data-theme');
       try{ localStorage.setItem('kmnzTheme', t); }catch(e){}
+      // 同步更新关键 CSS 变量，确保切换即时生效（无需刷新或跳页）
+      var vars = {
+        '--bg': dark? '#0b1116' : '#ffffff',
+        '--surface': dark? '#0f1720' : '#ffffff',
+        '--text': dark? '#e6eef8' : '#222222',
+        '--muted': dark? '#9aa6b2' : '#666',
+        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
+        '--accent': dark? '#59a6ff' : '#1e88e5',
+        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
+        '--hero-foreground': '#ffffff'
+      };
+      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
       const btn = document.getElementById('theme-toggle');
-      if(btn) btn.textContent = (t === 'dark') ? '🌙' : '☀️';
+      if(btn) btn.textContent = dark ? '🌙' : '☀️';
     }
     function initTheme(){
       let saved = null;
@@ -60,20 +73,24 @@ document.addEventListener('DOMContentLoaded', function(){
         e.preventDefault();
         const emailEl = document.getElementById('login-email');
         const email = (emailEl && emailEl.value || '').trim();
+        const pwdEl = document.getElementById('login-password');
+        const pwd = (pwdEl && pwdEl.value) || '';
         function fail(msg){ if(loginStatus){ loginStatus.textContent = msg; loginStatus.style.color = '#c0392b'; } return false; }
         if(!email) return fail('请填写邮箱或用户名。');
+        if(!pwd) return fail('请填写密码。');
 
-        // 若本地用户库中存在该用户则使用其头像与昵称，否则使用随机默认头像
+        // 必须在本地用户库中存在且密码匹配才允许登录
         const matched = window.getUsers().find(u => String(u.id) === String(email));
-        let avatar = '/KMNZ/assets/images/default4.png';
-        let nameFromStore = '';
-        if(matched){ avatar = matched.avatar || avatar; nameFromStore = matched.name || ''; }
-        else if(window.defaultAvatars && window.defaultAvatars.length) avatar = window.defaultAvatars[Math.floor(Math.random()*window.defaultAvatars.length)];
+        if(!matched) return fail('该账户不存在，请先注册。');
+        if(!matched.password) return fail('该账户未设置密码，请重新注册。');
+        if(matched.password !== pwd) return fail('密码错误。');
 
-        const user = { id: email, name: nameFromStore || email, avatar };
+        // 验证通过，使用已存信息登录
+        const avatar = matched.avatar || (window.defaultAvatars && window.defaultAvatars.length ? window.defaultAvatars[Math.floor(Math.random()*window.defaultAvatars.length)] : 'assets/images/default4.png');
+        const nameFromStore = matched.name || email;
+        const user = { id: email, name: nameFromStore, avatar };
         window.loginUser(user);
-        if(loginStatus){ loginStatus.textContent = '登录成功（模拟），1 秒后跳转到首页…'; loginStatus.style.color = ''; }
-        // 模拟登录成功后短暂提示，然后跳转到首页
+        if(loginStatus){ loginStatus.textContent = '登录成功，1 秒后跳转到首页…'; loginStatus.style.color = ''; }
         setTimeout(()=>{ location.href = 'index.html'; }, 1000);
       });
     }
@@ -109,10 +126,11 @@ document.addEventListener('DOMContentLoaded', function(){
         // 使用随机默认头像（注册时不再允许直接选择头像）
         let avatar = (window.defaultAvatars && window.defaultAvatars.length)
           ? window.defaultAvatars[Math.floor(Math.random()*window.defaultAvatars.length)]
-              : '/KMNZ/assets/images/default4.png';
+          : 'assets/images/default4.png';
 
         // all good —创建用户并写入本地用户库（使用邮箱作为唯一 id）
-        const user = { id: email, name: name, avatar };
+        // 保存密码以便后续登录校验（注意：本示例将密码明文存储在 localStorage，仅用于教学/演示）
+        const user = { id: email, name: name, avatar, password: p };
         // 重复检查（按邮箱）
         const existing = window.getUsers().find(u => String(u.id) === String(email));
         if(existing) return fail('该邮箱已被注册。');
@@ -121,9 +139,9 @@ document.addEventListener('DOMContentLoaded', function(){
         if(status) { status.textContent = ''; }
         if(success){
           success.hidden = false;
-          success.textContent = '注册成功（模拟），1 秒后跳转到首页…';
-          // 注册成功后短暂提示，然后跳转到首页
-          setTimeout(()=>{ location.href = 'index.html'; }, 1000);
+          success.textContent = '注册成功（模拟），1 秒后跳转到联系表单…';
+          // 注册成功后短暂提示，然后跳转到联系表单页
+          setTimeout(()=>{ location.href = 'contact.html'; }, 1000);
         }
       });
     }
@@ -201,20 +219,34 @@ document.addEventListener('DOMContentLoaded',function(){
   // 简单表单验证
   const form = document.getElementById('contact-form');
   if(form){
+    const status = document.getElementById('form-status');
+    const user = window.getStoredUser && window.getStoredUser();
+    // 若未登录则阻止提交，并提示前往登录
+    if(!user){
+      if(status){ status.textContent = '请先登录或注册后再提交。'; status.style.color = 'crimson'; }
+    }
     form.addEventListener('submit',e=>{
       e.preventDefault();
       const name = document.getElementById('name');
       const email = document.getElementById('email');
       const message = document.getElementById('message');
       const status = document.getElementById('form-status');
+      const cur = window.getStoredUser && window.getStoredUser();
+      if(!cur){
+        if(status){ status.textContent = '未登录，无法提交。请先登录或注册。'; status.style.color = 'crimson'; }
+        return;
+      }
       if(!name.value.trim()||!email.value.trim()||!message.value.trim()){
         status.textContent = '请完整填写所有字段。';
         status.style.color = 'crimson';
         return;
       }
+      // 简单成功提示（模拟提交）
       status.textContent = '发送成功（模拟）';
       status.style.color = 'green';
       form.reset();
+      // 保持 email 为当前用户 id
+      try{ email.value = cur.id || ''; }catch(e){}
     });
   }
 });
@@ -399,7 +431,7 @@ window.updateAuthUI = function(){
       userBox.dataset.logged = '0';
       const img = document.getElementById('nav-user-avatar');
       const idSpan = document.getElementById('nav-user-id');
-      if(img) img.src = '/KMNZ/assets/images/default4.png';
+      if(img) img.src = 'assets/images/default4.png';
       if(idSpan) idSpan.textContent = '';
     }
   };
@@ -500,10 +532,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
 /* 默认头像集合：使用工作区内现有图片作为随机分配池 */
 window.defaultAvatars = [
-  '/KMNZ/assets/images/Lita.PNG',
-  '/KMNZ/assets/images/Tina.PNG',
-  '/KMNZ/assets/images/Nero.PNG',
-  '/KMNZ/assets/images/default4.png' /* 占位：可替换为你上传的图片 */
+  'assets/images/Lita.PNG',
+  'assets/images/Tina.PNG',
+  'assets/images/Nero.PNG',
+  'assets/images/default4.png' /* 占位：可替换为你上传的图片 */
 ];
 
 // 接收 File 对象，返回压缩/缩放后的 dataURL，限制尺寸与大小
@@ -574,3 +606,33 @@ window.processAvatarFile = function(file, opts){
     reader.readAsDataURL(file);
   });
 };
+
+// 重置密码处理：在 reset.html 上绑定，修改 localStorage 中的用户密码并登录
+document.addEventListener('DOMContentLoaded', function(){
+  const resetForm = document.getElementById('reset-form');
+  if(!resetForm) return;
+  resetForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const status = document.getElementById('reset-status');
+    function fail(msg){ if(status){ status.textContent = msg; status.style.color = '#c0392b'; } return false; }
+    const email = (document.getElementById('reset-email').value || '').trim();
+    const p = (document.getElementById('reset-password').value || '');
+    const p2 = (document.getElementById('reset-password2').value || '');
+    if(!email) return fail('请填写邮箱或用户名。');
+    if(p.length < 8) return fail('密码长度至少 8 位。');
+    if(p !== p2) return fail('两次密码不一致。');
+    const users = window.getUsers();
+    const idx = users.findIndex(u => String(u.id) === String(email));
+    if(idx < 0) return fail('该账户不存在。');
+    // 更新密码并保存
+    users[idx].password = p;
+    window.saveUsers(users);
+    // 登录该用户
+    const matched = users[idx];
+    const avatar = matched.avatar || (window.defaultAvatars && window.defaultAvatars.length ? window.defaultAvatars[0] : 'assets/images/default4.png');
+    const user = { id: matched.id, name: matched.name || matched.id, avatar };
+    window.loginUser(user);
+    if(status){ status.style.color = ''; status.textContent = '密码已重置并已登录，1 秒后跳转到首页…'; }
+    setTimeout(()=>{ location.href = 'index.html'; }, 1000);
+  });
+});

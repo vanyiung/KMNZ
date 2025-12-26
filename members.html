@@ -4,27 +4,48 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>KMNZ — 成员</title>
-  <link rel="stylesheet" href="/KMNZ/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
   <meta name="description" content="KMNZ 成员索引页 — 点击头像查看详细资料。">
   <meta name="robots" content="index,follow">
-  <link rel="canonical" href="/kmnz/members.html">
+  <link rel="canonical" href="members.html">
   <!-- Open Graph -->
   <meta property="og:title" content="KMNZ — 成员">
   <meta property="og:description" content="KMNZ 成员索引页 — 点击头像查看详细资料。">
-  <meta property="og:image" content="/KMNZ/assets/images/kmnz.jpg">
-  <meta property="og:url" content="/kmnz/members.html">
+  <meta property="og:image" content="assets/images/kmnz.jpg">
+  <meta property="og:url" content="members.html">
   <meta property="og:type" content="website">
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="KMNZ — 成员">
   <meta name="twitter:description" content="KMNZ 成员索引页 — 点击头像查看详细资料。">
-  <meta name="twitter:image" content="/KMNZ/assets/images/kmnz.jpg">
+  <meta name="twitter:image" content="assets/images/kmnz.jpg">
   <!-- Favicon / Touch icons -->
-  <link rel="icon" href="/KMNZ/assets/images/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/KMNZ/assets/images/logo.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/KMNZ/assets/images/logo.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/KMNZ/assets/images/logo.png">
+  <link rel="icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo.png">
   <meta name="theme-color" content="#ffffff">
+    <script>
+    (function(){
+      try{
+        var t = localStorage.getItem('kmnzTheme');
+        if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
+        document.documentElement.setAttribute('data-theme', t || 'light');
+        var dark = (t === 'dark');
+        var vars = {
+          '--bg': dark? '#0b1116' : '#ffffff',
+          '--surface': dark? '#0f1720' : '#ffffff',
+          '--text': dark? '#e6eef8' : '#222222',
+          '--muted': dark? '#9aa6b2' : '#666',
+          '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
+          '--accent': dark? '#59a6ff' : '#1e88e5',
+          '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
+          '--hero-foreground': '#ffffff'
+        };
+        for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
+      }catch(e){}
+    })();
+    </script>
   
 </head>
 <body>
@@ -40,7 +61,7 @@
       <a href="about.html">关于</a>
       <button id="nav-auth-btn" class="nav-auth-btn" aria-haspopup="dialog">登录 / 注册</button>
       <div id="nav-user" class="nav-user" hidden>
-        <img id="nav-user-avatar" src="/KMNZ/assets/images/avatar-default.png" alt="用户头像">
+        <img id="nav-user-avatar" src="assets/images/avatar-default.png" alt="用户头像">
         <span id="nav-user-id"></span>
         <button id="nav-signout" class="nav-signout" aria-label="退出登录">退出</button>
       </div>
@@ -56,25 +77,25 @@
   <section class="members-grid" id="members-grid">
     <a class="member-link" href="member1.html" aria-label="查看 LITA 的资料">
       <div class="member-card">
-        <div class="member-photo"><img src="/KMNZ/assets/images/member1.png" alt="LITA"></div>
+        <div class="member-photo"><img src="assets/images/member1.png" alt="LITA"></div>
         <div class="member-name">LITA</div>
       </div>
     </a>
     <a class="member-link" href="member2.html" aria-label="查看 TINA 的资料">
       <div class="member-card">
-        <div class="member-photo"><img src="/KMNZ/assets/images/member2.png" alt="TINA"></div>
+        <div class="member-photo"><img src="assets/images/member2.png" alt="TINA"></div>
         <div class="member-name">TINA</div>
       </div>
     </a>
     <a class="member-link" href="member3.html" aria-label="查看 NERO 的资料">
       <div class="member-card">
-        <div class="member-photo"><img src="/KMNZ/assets/images/member3.png" alt="NERO"></div>
+        <div class="member-photo"><img src="assets/images/member3.png" alt="NERO"></div>
         <div class="member-name">NERO</div>
       </div>
     </a>
     <a class="member-link" href="member4.html" aria-label="查看 LIZ 的资料">
       <div class="member-card">
-        <div class="member-photo"><img src="/KMNZ/assets/images/member4.png" alt="LIZ"></div>
+        <div class="member-photo"><img src="assets/images/member4.png" alt="LIZ"></div>
         <div class="member-name">LIZ</div>
       </div>
     </a>
@@ -84,6 +105,6 @@
 <footer class="site-footer">
   <div class="container">© 2025 KMNHZ-China</div>
 </footer>
-<script src="/KMNZ/js/main.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

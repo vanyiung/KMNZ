@@ -110,10 +110,6 @@ button{background:var(--accent);color:#fff;padding:8px 14px;border:0;border-radi
   .member-photo{width:200px;height:200px}
 }
 
-/* 可点击可聚焦样式 */
-.member-link{outline:none;text-decoration:none;color:inherit}
-.member-link:focus .member-photo{box-shadow:0 10px 30px rgba(0,0,0,0.15);transform:scale(1.06)}
-
 /* 布局微调 */
 
 
@@ -387,10 +383,17 @@ body.home main.container { padding-bottom: 0; }
 /* 成功提示 */
 .success-note{background:#e9f7ef;border:1px solid #c7efd5;padding:10px;border-radius:6px;color:#207a3b;margin-top:12px}
 
+/* 移动端样式：隐藏侧边图片，表单占满宽度并增加可点击区域 */
 @media(max-width:900px){
-  .auth-left{order:2;flex:none;height:200px}
-  .auth-right{order:1;flex:none;padding:20px}
+  .auth-page{flex-direction:column}
+  .auth-left{display:none;order:2;flex:none;height:0}
+  .auth-left img{display:none}
+  .auth-right{order:1;flex:none;padding:20px;width:100%;box-shadow:none;border-radius:0}
   .auth-right .auth-inner{max-width:none}
+  .auth-right .field{margin-bottom:14px}
+  .auth-right button{width:100%;padding:12px}
+  .auth-right .auth-forgot{display:block;width:100%;text-align:center;padding:10px 12px}
+  input,textarea{font-size:1rem}
 }
 /* 主题切换按钮样式（通过 JS 注入到导航） */
 .theme-toggle{
@@ -445,9 +448,20 @@ html[data-theme="dark"] .site-footer{background:var(--surface);color:var(--muted
 .auth-panel label{display:block;margin-bottom:8px}
 .auth-panel input{width:100%;padding:8px;border:1px solid #ddd;border-radius:4px}
 
+/* 忘记密码链接样式，匹配认证面板的视觉风格 */
+.auth-right .auth-forgot{
+  display:inline-block;
+  margin-top:8px;
+  color:var(--muted);
+  background:transparent;
+  border:1px solid rgba(0,0,0,0.04);
+  padding:6px 10px;
+  border-radius:6px;
+  text-decoration:none;
+  font-size:0.95rem;
+}
+.auth-right .auth-forgot:hover{ background:rgba(0,0,0,0.03); color:var(--text); }
+
 @media(max-width:900px){
   .auth-page{flex-direction:column}
-  .auth-left{order:2;flex: none;height:240px}
-  .auth-left img{height:100%;object-position:center}
-  .auth-right{order:1;flex:none;padding:24px}
 }

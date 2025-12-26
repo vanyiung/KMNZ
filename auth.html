@@ -4,8 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>登录 / 注册 — KMNZ</title>
-  <script>try{var t=localStorage.getItem('kmnzTheme'); if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark'; if(t==='dark') document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-  <link rel="stylesheet" href="/KMNZ/css/style.css">
+  <script>
+  (function(){
+    try{
+      var t = localStorage.getItem('kmnzTheme');
+      if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
+      document.documentElement.setAttribute('data-theme', t || 'light');
+      var dark = (t === 'dark');
+      var vars = {
+        '--bg': dark? '#0b1116' : '#ffffff',
+        '--surface': dark? '#0f1720' : '#ffffff',
+        '--text': dark? '#e6eef8' : '#222222',
+        '--muted': dark? '#9aa6b2' : '#666',
+        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
+        '--accent': dark? '#59a6ff' : '#1e88e5',
+        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
+        '--hero-foreground': '#ffffff'
+      };
+      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
+    }catch(e){}
+  })();
+  </script>
+  <link rel="stylesheet" href="css/style.css">
   <meta name="description" content="KMNZ 登录与注册"> 
   <meta name="robots" content="noindex">
 </head>
@@ -21,7 +41,7 @@
         <a href="about.html">关于</a>
         <button id="nav-auth-btn" class="nav-auth-btn" aria-haspopup="dialog">登录 / 注册</button>
         <div id="nav-user" class="nav-user" hidden>
-          <img id="nav-user-avatar" src="/KMNZ/assets/images/default4.png" alt="用户头像">
+          <img id="nav-user-avatar" src="assets/images/default4.png" alt="用户头像">
           <span id="nav-user-id"></span>
           <button id="nav-signout" class="nav-signout" aria-label="退出登录">退出</button>
         </div>
@@ -31,7 +51,7 @@
 
   <main class="auth-page">
     <div class="auth-left">
-      <img src="/KMNZ/assets/images/kmnz2.png" alt="KMNZ" />
+      <img src="assets/images/kmnz2.png" alt="KMNZ" />
     </div>
     <div class="auth-right" id="auth-right">
       <div class="auth-inner">
@@ -53,6 +73,7 @@
             </div>
             <div style="margin-top:12px"><button type="submit">登录</button></div>
             <div id="login-status" aria-live="polite" class="help" style="margin-top:8px"></div>
+            <div style="margin-top:8px"><a class="auth-forgot" href="reset.html">忘记密码？</a></div>
           </form>
         </div>
 
@@ -93,6 +114,6 @@
   <footer class="site-footer"><div class="container">© 2025 KMNHZ-China</div></footer>
 
   <!-- 引入站点脚本，确保认证交互可用 -->
-  <script src="/KMNZ/js/main.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

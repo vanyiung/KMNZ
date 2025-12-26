@@ -4,8 +4,28 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>个人中心 — KMNZ</title>
-  <link rel="stylesheet" href="/KMNZ/css/style.css">
-  <script>try{var t=localStorage.getItem('kmnzTheme'); if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark'; if(t==='dark') document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+  (function(){
+    try{
+      var t = localStorage.getItem('kmnzTheme');
+      if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
+      document.documentElement.setAttribute('data-theme', t || 'light');
+      var dark = (t === 'dark');
+      var vars = {
+        '--bg': dark? '#0b1116' : '#ffffff',
+        '--surface': dark? '#0f1720' : '#ffffff',
+        '--text': dark? '#e6eef8' : '#222222',
+        '--muted': dark? '#9aa6b2' : '#666',
+        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
+        '--accent': dark? '#59a6ff' : '#1e88e5',
+        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
+        '--hero-foreground': '#ffffff'
+      };
+      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
+    }catch(e){}
+  })();
+  </script>
 </head>
 <body>
   <header class="site-header">
@@ -19,7 +39,7 @@
         <a href="about.html">关于</a>
         <button id="nav-auth-btn" class="nav-auth-btn" aria-haspopup="dialog">登录 / 注册</button>
         <div id="nav-user" class="nav-user" hidden>
-          <img id="nav-user-avatar" src="/KMNZ/assets/images/default4.png" alt="用户头像">
+          <img id="nav-user-avatar" src="assets/images/default4.png" alt="用户头像">
           <span id="nav-user-id"></span>
           <button id="nav-signout" class="nav-signout" aria-label="退出登录">退出</button>
         </div>
@@ -31,7 +51,7 @@
     <section style="padding:24px 0;">
       <div style="display:flex;gap:16px;align-items:center;margin-bottom:12px">
         <div class="avatar-preview-small" style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:1px solid var(--border)">
-          <img id="user-avatar" src="/KMNZ/assets/images/default4.png" alt="当前头像" style="width:100%;height:100%;object-fit:cover;display:block">
+          <img id="user-avatar" src="assets/images/default4.png" alt="当前头像" style="width:100%;height:100%;object-fit:cover;display:block">
         </div>
         <div>
           <div><strong id="user-name">用户</strong></div>
@@ -63,7 +83,7 @@
   </main>
 
   <footer class="site-footer"><div class="container">© 2025 KMNHZ-China</div></footer>
-  <script src="/KMNZ/js/main.js"></script>
+  <script src="js/main.js"></script>
   <script>
     (function(){
       const user = window.getStoredUser();
@@ -82,7 +102,7 @@
         location.href = 'auth.html#login';
         return;
       }
-      if(avatarImg) avatarImg.src = user.avatar || (window.defaultAvatars && window.defaultAvatars[0]) || '/KMNZ/assets/images/default4.png';
+      if(avatarImg) avatarImg.src = user.avatar || (window.defaultAvatars && window.defaultAvatars[0]) || 'assets/images/default4.png';
       if(nameEl) nameEl.textContent = user.name || user.id || '用户';
       if(idEl) idEl.textContent = 'ID: ' + (user.id || '-');
 
@@ -147,7 +167,7 @@
       if(btnClear){
         btnClear.addEventListener('click', ()=>{
           const cur = window.getStoredUser() || { id: 'user' };
-          cur.avatar = (window.defaultAvatars && window.defaultAvatars.length) ? window.defaultAvatars[Math.floor(Math.random()*window.defaultAvatars.length)] : '/KMNZ/assets/images/default4.png';
+          cur.avatar = (window.defaultAvatars && window.defaultAvatars.length) ? window.defaultAvatars[Math.floor(Math.random()*window.defaultAvatars.length)] : 'assets/images/default4.png';
           window.loginUser(cur);
           if(avatarImg) avatarImg.src = cur.avatar;
           if(msg) msg.textContent = '已重置为默认头像。';

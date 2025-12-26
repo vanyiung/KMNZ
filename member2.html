@@ -4,37 +4,56 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>TINA — KMNZ 成员</title>
-  <link rel="stylesheet" href="/KMNZ/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
   <meta name="description" content="TINA 的资料页 — 白色哈士奇，甜妹风格。">
   <meta name="robots" content="index,follow">
-  <link rel="canonical" href="/kmnz/member2.html">
+  <link rel="canonical" href="member2.html">
   <!-- Open Graph -->
   <meta property="og:title" content="TINA — KMNZ 成员">
   <meta property="og:description" content="TINA 的资料页 — 白色哈士奇，甜妹风格。">
-  <meta property="og:image" content="/KMNZ/assets/images/member2.png">
-  <meta property="og:url" content="/kmnz/member2.html">
+  <meta property="og:image" content="assets/images/member2.png">
+  <meta property="og:url" content="member2.html">
   <meta property="og:type" content="profile">
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="TINA — KMNZ 成员">
   <meta name="twitter:description" content="TINA 的资料页 — 白色哈士奇，甜妹风格。">
-  <meta name="twitter:image" content="/KMNZ/assets/images/member2.png">
+  <meta name="twitter:image" content="assets/images/member2.png">
   <!-- Favicon / Touch icons -->
-  <link rel="icon" href="/KMNZ/assets/images/favicon.ico">
-  <link rel="icon" type="image/png" sizes="32x32" href="/KMNZ/assets/images/logo.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/KMNZ/assets/images/logo.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/KMNZ/assets/images/logo.png">
+  <link rel="icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo.png">
   <meta name="theme-color" content="#ffffff">
-  <script>try{var t=localStorage.getItem('kmnzTheme'); if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark'; if(t==='dark') document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
-  <link rel="stylesheet" href="/KMNZ/css/style.css">
+  <script>
+  (function(){
+    try{
+      var t = localStorage.getItem('kmnzTheme');
+      if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
+      document.documentElement.setAttribute('data-theme', t || 'light');
+      var dark = (t === 'dark');
+      var vars = {
+        '--bg': dark? '#0b1116' : '#ffffff',
+        '--surface': dark? '#0f1720' : '#ffffff',
+        '--text': dark? '#e6eef8' : '#222222',
+        '--muted': dark? '#9aa6b2' : '#666',
+        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
+        '--accent': dark? '#59a6ff' : '#1e88e5',
+        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
+        '--hero-foreground': '#ffffff'
+      };
+      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
+    }catch(e){}
+  })();
+  </script>
 </head>
 <body>
-<header class="site-header"><div class="container"><h1 class="site-title">KMNZ</h1><button id="nav-toggle" class="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="打开导航">☰</button><nav id="site-nav" class="site-nav"><a href="index.html">首页</a><a href="members.html">成员</a><a href="history.html">历程</a><a href="about.html">关于</a><button id="nav-auth-btn" class="nav-auth-btn" aria-haspopup="dialog">登录 / 注册</button><div id="nav-user" class="nav-user" hidden><img id="nav-user-avatar" src="/KMNZ/assets/images/avatar-default.png" alt="用户头像"><span id="nav-user-id"></span><button id="nav-signout" class="nav-signout" aria-label="退出登录">退出</button></div></nav></div></header>
+<header class="site-header"><div class="container"><h1 class="site-title">KMNZ</h1><button id="nav-toggle" class="nav-toggle" aria-controls="site-nav" aria-expanded="false" aria-label="打开导航">☰</button><nav id="site-nav" class="site-nav"><a href="index.html">首页</a><a href="members.html">成员</a><a href="history.html">历程</a><a href="about.html">关于</a><button id="nav-auth-btn" class="nav-auth-btn" aria-haspopup="dialog">登录 / 注册</button><div id="nav-user" class="nav-user" hidden><img id="nav-user-avatar" src="assets/images/avatar-default.png" alt="用户头像"><span id="nav-user-id"></span><button id="nav-signout" class="nav-signout" aria-label="退出登录">退出</button></div></nav></div></header>
 <main class="container">
   <article>
     <h2>TINA</h2>
     <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-      <div class="member-photo" style="width:220px;height:220px;margin-bottom:12px;"><img src="/KMNZ/assets/images/member2.png" alt="TINA"></div>
+      <div class="member-photo" style="width:220px;height:220px;margin-bottom:12px;"><img src="assets/images/member2.png" alt="TINA"></div>
       <div class="member-info">
         <p>初次见面，我是 <strong>KMNZ TINA</strong>。是一只超级可爱的狗狗，喜欢土豆和红薯。请多多指教。</p>
         <div style="margin-top:10px">
@@ -45,6 +64,6 @@
   </article>
 </main>
 <footer class="site-footer"><div class="container">© 2025 KMNZ-China</div></footer>
-<script src="/KMNZ/js/main.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
