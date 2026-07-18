@@ -4,30 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>登录 / 注册 — KMNZ</title>
-  <script>
-  (function(){
-    try{
-      var t = localStorage.getItem('kmnzTheme');
-      if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
-      document.documentElement.setAttribute('data-theme', t || 'light');
-      var dark = (t === 'dark');
-      var vars = {
-        '--bg': dark? '#0b1116' : '#ffffff',
-        '--surface': dark? '#0f1720' : '#ffffff',
-        '--text': dark? '#e6eef8' : '#222222',
-        '--muted': dark? '#9aa6b2' : '#666',
-        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
-        '--accent': dark? '#59a6ff' : '#1e88e5',
-        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
-        '--hero-foreground': '#ffffff'
-      };
-      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
-    }catch(e){}
-  })();
-  </script>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <meta name="description" content="KMNZ 登录与注册"> 
   <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo.png">
+  <meta name="theme-color" content="#ffffff">
 </head>
 <body>
   <header class="site-header">
@@ -71,9 +56,9 @@
               <label for="login-password">密码</label>
               <input type="password" id="login-password" required aria-required="true">
             </div>
-            <div style="margin-top:12px"><button type="submit">登录</button></div>
-            <div id="login-status" aria-live="polite" class="help" style="margin-top:8px"></div>
-            <div style="margin-top:8px"><a class="auth-forgot" href="reset.html">忘记密码？</a></div>
+            <div class="form-action"><button type="submit">登录</button></div>
+            <div id="login-status" aria-live="polite" class="status-line form-note"></div>
+            <div class="form-note"><a class="auth-forgot" href="reset.html">忘记密码？</a></div>
           </form>
         </div>
 
@@ -102,8 +87,8 @@
 
             <!-- 头像选择已移除，注册后请在个人页面编辑头像 -->
 
-            <div style="margin-top:12px"><button type="submit">注册</button></div>
-            <div id="reg-status" aria-live="polite" class="help" style="margin-top:8px"></div>
+            <div class="form-action"><button type="submit">注册</button></div>
+            <div id="reg-status" aria-live="polite" class="status-line form-note"></div>
             <div id="reg-success" class="success-note" hidden>注册成功，你已登录。</div>
           </form>
         </div>
@@ -114,6 +99,7 @@
   <footer class="site-footer"><div class="container">© 2025 KMNHZ-China</div></footer>
 
   <!-- 引入站点脚本，确保认证交互可用 -->
+  <script src="js/config.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

@@ -1,638 +1,606 @@
-// auth UI helper: switch panels and update tab states
-function showPanel(name){
-  const loginPanel = document.getElementById('panel-login');
-  const registerPanel = document.getElementById('panel-register');
-  const tabLogin = document.getElementById('tab-login');
-  const tabRegister = document.getElementById('tab-register');
-  if(!tabLogin || !tabRegister || !loginPanel || !registerPanel) return;
-  loginPanel.hidden = name !== 'login';
-  registerPanel.hidden = name !== 'register';
-  tabLogin.classList.toggle('active', name === 'login');
-  tabRegister.classList.toggle('active', name === 'register');
-  tabLogin.setAttribute('aria-selected', name === 'login');
-  tabRegister.setAttribute('aria-selected', name === 'register');
-}
+(function () {
+  const DEFAULT_AVATAR = 'assets/images/default4.png';
 
-document.addEventListener('DOMContentLoaded', function(){
-  const tabLogin = document.getElementById('tab-login');
-  const tabRegister = document.getElementById('tab-register');
-  // 主题初始化与切换（注入到导航）
-  (function(){
-    function applyTheme(t){
-      var dark = (t === 'dark');
-      if(dark) document.documentElement.setAttribute('data-theme','dark');
-      else document.documentElement.removeAttribute('data-theme');
-      try{ localStorage.setItem('kmnzTheme', t); }catch(e){}
-      // 同步更新关键 CSS 变量，确保切换即时生效（无需刷新或跳页）
-      var vars = {
-        '--bg': dark? '#0b1116' : '#ffffff',
-        '--surface': dark? '#0f1720' : '#ffffff',
-        '--text': dark? '#e6eef8' : '#222222',
-        '--muted': dark? '#9aa6b2' : '#666',
-        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
-        '--accent': dark? '#59a6ff' : '#1e88e5',
-        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
-        '--hero-foreground': '#ffffff'
-      };
-      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
-      const btn = document.getElementById('theme-toggle');
-      if(btn) btn.textContent = dark ? '🌙' : '☀️';
+  window.defaultAvatars = [
+    'assets/images/Lita.PNG',
+    'assets/images/Tina.PNG',
+    'assets/images/Nero.PNG',
+    DEFAULT_AVATAR
+  ];
+
+  function onReady(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
+    } else {
+      fn();
     }
-    function initTheme(){
-      let saved = null;
-      try{ saved = localStorage.getItem('kmnzTheme'); }catch(e){}
-      if(!saved){
-        saved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  }
+
+  function getFirebaseConfig() {
+    return (window.KMNZ_CONFIG && window.KMNZ_CONFIG.firebaseConfig) || window.FIREBASE_CONFIG || null;
+  }
+
+  function randomAvatar() {
+    const list = window.defaultAvatars || [];
+    return list.length ? list[Math.floor(Math.random() * list.length)] : DEFAULT_AVATAR;
+  }
+
+  function setStatus(el, message, type) {
+    if (!el) return;
+    el.textContent = message || '';
+    el.classList.remove('is-error', 'is-success');
+    if (type) el.classList.add(type === 'error' ? 'is-error' : 'is-success');
+  }
+
+  function ensureFirebase() {
+    if (window._firebaseInitPromise) return window._firebaseInitPromise;
+
+    window._firebaseInitPromise = new Promise((resolve, reject) => {
+      const config = getFirebaseConfig();
+      if (!config) return resolve(null);
+
+      function finish() {
+        try {
+          if (!window.firebase.apps || !window.firebase.apps.length) {
+            window.firebase.initializeApp(config);
+          }
+          resolve(window.firebase);
+        } catch (error) {
+          reject(error);
+        }
       }
-      applyTheme(saved);
-    }
-    const siteNav = document.getElementById('site-nav');
-    if(siteNav && !document.getElementById('theme-toggle')){
-      const tbtn = document.createElement('button');
-      tbtn.id = 'theme-toggle'; tbtn.type = 'button'; tbtn.className = 'theme-toggle';
-      tbtn.setAttribute('aria-label','切换主题');
-      siteNav.appendChild(tbtn);
-      tbtn.addEventListener('click', ()=>{
-        const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-        applyTheme(cur === 'dark' ? 'light' : 'dark');
-      });
-      initTheme();
-    }
-  })();
-  if(tabLogin && tabRegister){
-    const hash = location.hash.replace('#','');
-    showPanel(hash==='register'? 'register' : 'login');
-    tabLogin.addEventListener('click', ()=>{ showPanel('login'); location.hash='login'; });
-    tabRegister.addEventListener('click', ()=>{ showPanel('register'); location.hash='register'; });
 
-    // login handler
-    const loginForm = document.getElementById('login-form');
-    if(loginForm){
-      const loginStatus = document.getElementById('login-status');
-      loginForm.addEventListener('submit', function(e){
-        e.preventDefault();
-        const emailEl = document.getElementById('login-email');
-        const email = (emailEl && emailEl.value || '').trim();
-        const pwdEl = document.getElementById('login-password');
-        const pwd = (pwdEl && pwdEl.value) || '';
-        function fail(msg){ if(loginStatus){ loginStatus.textContent = msg; loginStatus.style.color = '#c0392b'; } return false; }
-        if(!email) return fail('请填写邮箱或用户名。');
-        if(!pwd) return fail('请填写密码。');
-
-        // 必须在本地用户库中存在且密码匹配才允许登录
-        const matched = window.getUsers().find(u => String(u.id) === String(email));
-        if(!matched) return fail('该账户不存在，请先注册。');
-        if(!matched.password) return fail('该账户未设置密码，请重新注册。');
-        if(matched.password !== pwd) return fail('密码错误。');
-
-        // 验证通过，使用已存信息登录
-        const avatar = matched.avatar || (window.defaultAvatars && window.defaultAvatars.length ? window.defaultAvatars[Math.floor(Math.random()*window.defaultAvatars.length)] : 'assets/images/default4.png');
-        const nameFromStore = matched.name || email;
-        const user = { id: email, name: nameFromStore, avatar };
-        window.loginUser(user);
-        if(loginStatus){ loginStatus.textContent = '登录成功，1 秒后跳转到首页…'; loginStatus.style.color = ''; }
-        setTimeout(()=>{ location.href = 'index.html'; }, 1000);
-      });
-    }
-
-    // register handler
-    const regForm = document.getElementById('register-form');
-    if(regForm){
-      regForm.addEventListener('submit', async function(e){
-        e.preventDefault();
-        const status = document.getElementById('reg-status');
-        const success = document.getElementById('reg-success');
-        if(status) { status.textContent = ''; status.style.color = ''; }
-
-        // gather values
-        const name = (document.getElementById('reg-name').value || '').trim();
-        const email = (document.getElementById('reg-email').value || '').trim();
-        const p = document.getElementById('reg-password').value || '';
-        const p2 = document.getElementById('reg-password2').value || '';
-        // avatar selection removed from registration; assign a random default avatar
-
-        // basic validation
-        function fail(msg){ if(status){ status.textContent = msg; status.style.color = '#c0392b'; } return false; }
-        if(!name) return fail('请填写昵称。');
-        if(!email) return fail('请填写邮箱或用户名。');
-        // 简单邮箱格式检查（允许用户名形式也通过，但优先检查含 @ 的邮箱格式）
-        if(email.indexOf('@') >= 0){
-          const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-          if(!re.test(email)) return fail('请输入有效的邮箱地址。');
-        }
-        if(p.length < 8) return fail('密码长度至少 8 位。');
-        if(p !== p2) return fail('两次密码不一致。');
-
-        // 使用随机默认头像（注册时不再允许直接选择头像）
-        let avatar = (window.defaultAvatars && window.defaultAvatars.length)
-          ? window.defaultAvatars[Math.floor(Math.random()*window.defaultAvatars.length)]
-          : 'assets/images/default4.png';
-
-        // all good —创建用户并写入本地用户库（使用邮箱作为唯一 id）
-        // 保存密码以便后续登录校验（注意：本示例将密码明文存储在 localStorage，仅用于教学/演示）
-        const user = { id: email, name: name, avatar, password: p };
-        // 重复检查（按邮箱）
-        const existing = window.getUsers().find(u => String(u.id) === String(email));
-        if(existing) return fail('该邮箱已被注册。');
-        const users = window.getUsers(); users.push(user); window.saveUsers(users);
-        if(typeof window.loginUser === 'function') window.loginUser(user);
-        if(status) { status.textContent = ''; }
-        if(success){
-          success.hidden = false;
-          success.textContent = '注册成功（模拟），1 秒后跳转到联系表单…';
-          // 注册成功后短暂提示，然后跳转到联系表单页
-          setTimeout(()=>{ location.href = 'contact.html'; }, 1000);
-        }
-      });
-    }
-  }
-});
-document.addEventListener('DOMContentLoaded',function(){
-  const navToggle = document.getElementById('nav-toggle');
-  const siteNav = document.getElementById('site-nav');
-  if(navToggle && siteNav){
-    navToggle.addEventListener('click',()=>{
-      const shown = siteNav.getAttribute('data-visible') === 'true';
-      const next = !shown;
-      siteNav.setAttribute('data-visible', next);
-      siteNav.style.display = shown ? 'none' : 'block';
-      navToggle.setAttribute('aria-expanded', String(next));
-    });
-  }
-
-  // 渲染文章列表（若存在 data.js 的 posts）
-  if(window.posts && document.getElementById('posts-list')){
-    const list = document.getElementById('posts-list');
-    list.innerHTML = '';
-    window.posts.forEach(p=>{
-      const card = document.createElement('article');
-      card.className = 'post-card';
-      card.innerHTML = `<h4><a href="post-detail.html?id=${p.id}">${p.title}</a></h4><p class="meta">${p.date} · ${p.author}</p><p>${p.excerpt}</p>`;
-      list.appendChild(card);
-    });
-  }
-
-  // 渲染成员列表（如果存在成员数据和容器）
-  if(window.members && document.getElementById('members-grid')){
-    const grid = document.getElementById('members-grid');
-    grid.innerHTML = '';
-    window.members.forEach(m=>{
-      const a = document.createElement('a');
-      a.className = 'member-link';
-      a.href = `member${m.id}.html`;
-      a.setAttribute('aria-label', m.name + ' 资料页');
-      a.tabIndex = 0;
-      a.innerHTML = `
-        <div class="member-card">
-          <div class="member-photo"><img src="${m.photo}" alt="${m.name}" loading="lazy"></div>
-          <div class="member-name">${m.name}</div>
-        </div>`;
-      // 支持键盘回车打开链接
-      a.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter') window.location.href = a.href;
-      });
-      grid.appendChild(a);
-    });
-  }
-
-  // 文章详情页渲染
-  if(window.posts && document.getElementById('post-detail')){
-    const params = new URLSearchParams(location.search);
-    const id = params.get('id');
-    const post = window.posts.find(x=>String(x.id)===String(id)) || window.posts[0];
-    if(post){
-      document.getElementById('post-title').textContent = post.title;
-      document.getElementById('post-meta').textContent = `${post.author} · ${post.date}`;
-      document.getElementById('post-content').innerHTML = post.content;
-    }
-  }
-
-  // 图片拖动/按下时微放大（支持鼠标按下或触摸）
-  document.querySelectorAll('.member-photo').forEach(photo=>{
-    photo.addEventListener('mousedown',()=>photo.classList.add('dragging'));
-    photo.addEventListener('mouseup',()=>photo.classList.remove('dragging'));
-    photo.addEventListener('mouseleave',()=>photo.classList.remove('dragging'));
-    photo.addEventListener('touchstart',()=>photo.classList.add('dragging'),{passive:true});
-    photo.addEventListener('touchend',()=>photo.classList.remove('dragging'));
-  });
-
-  // 简单表单验证
-  const form = document.getElementById('contact-form');
-  if(form){
-    const status = document.getElementById('form-status');
-    const user = window.getStoredUser && window.getStoredUser();
-    // 若未登录则阻止提交，并提示前往登录
-    if(!user){
-      if(status){ status.textContent = '请先登录或注册后再提交。'; status.style.color = 'crimson'; }
-    }
-    form.addEventListener('submit',e=>{
-      e.preventDefault();
-      const name = document.getElementById('name');
-      const email = document.getElementById('email');
-      const message = document.getElementById('message');
-      const status = document.getElementById('form-status');
-      const cur = window.getStoredUser && window.getStoredUser();
-      if(!cur){
-        if(status){ status.textContent = '未登录，无法提交。请先登录或注册。'; status.style.color = 'crimson'; }
+      if (window.firebase && window.firebase.auth) {
+        finish();
         return;
       }
-      if(!name.value.trim()||!email.value.trim()||!message.value.trim()){
-        status.textContent = '请完整填写所有字段。';
-        status.style.color = 'crimson';
-        return;
-      }
-      // 简单成功提示（模拟提交）
-      status.textContent = '发送成功（模拟）';
-      status.style.color = 'green';
-      form.reset();
-      // 保持 email 为当前用户 id
-      try{ email.value = cur.id || ''; }catch(e){}
-    });
-  }
-});
 
+      const base = 'https://www.gstatic.com/firebasejs/9.22.2';
+      const scripts = ['firebase-app-compat.js', 'firebase-auth-compat.js'];
+      let loaded = 0;
 
-
-
-
-document.addEventListener('DOMContentLoaded', function () {
-  const carousel = document.querySelector('.hero-carousel');
-  if (!carousel) return;
-
-  // 防止重复初始化（若脚本被多次加载）
-  if (carousel.dataset.carouselInitialized) return;
-  carousel.dataset.carouselInitialized = '1';
-
-  const slides = Array.from(carousel.querySelectorAll('.slide'));
-  const nextBtn = carousel.querySelector('.carousel-control.next');
-  const prevBtn = carousel.querySelector('.carousel-control.prev');
-  // 确保 current 在生成指示器前已知，避免引用未定义变量
-  let current = slides.findIndex(s => s.classList.contains('active'));
-  if (current < 0) current = 0;
-  // 指示器容器与字母映射（不够时循环使用字母）
-  const indicatorsContainer = carousel.querySelector('.carousel-indicators');
-  const letters = ['K','M','N','Z'];
-
-  // 动态生成指示器（如果 HTML 中没有或数量不匹配时）
-  if (indicatorsContainer) {
-    const existing = Array.from(indicatorsContainer.querySelectorAll('.indicator'));
-    if (existing.length !== slides.length) {
-      indicatorsContainer.innerHTML = '';
-      slides.forEach((s, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'indicator';
-        btn.type = 'button';
-        btn.dataset.index = String(i);
-        btn.setAttribute('role', 'tab');
-        btn.setAttribute('aria-label', `第 ${i+1} 张`);
-        btn.setAttribute('aria-selected', i === current ? 'true' : 'false');
-        btn.textContent = letters[i % letters.length];
-        indicatorsContainer.appendChild(btn);
-      });
-    }
-  }
-
-  const indicators = Array.from(carousel.querySelectorAll('.indicator'));
-  let timer = null;
-  const interval = (() => {
-    const v = carousel.dataset.interval;
-    return (v && !isNaN(Number(v)) && Number(v) > 0) ? Number(v) : 4000;
-  })();
-
-  if (slides.length === 0) return;
-
-  // current 已在上方初始化
-
-  // 初始化 ARIA 与样式基线
-  slides.forEach((s, i) => {
-    s.setAttribute('role', 'tabpanel');
-    s.setAttribute('aria-hidden', i === current ? 'false' : 'true');
-    // 确保只有 active 的 slide 可见（兼容现有 CSS）
-    s.style.zIndex = (i === current) ? '2' : '1';
-  });
-  if (indicators.length === slides.length) {
-    indicators.forEach((btn, i) => {
-      btn.classList.toggle('active', i === current);
-      btn.setAttribute('aria-selected', i === current ? 'true' : 'false');
-    });
-  }
-
-  function show(index) {
-    if (!slides.length) return;
-    index = ((index % slides.length) + slides.length) % slides.length;
-    slides.forEach((s, i) => {
-      const active = i === index;
-      s.classList.toggle('active', active);
-      s.setAttribute('aria-hidden', active ? 'false' : 'true');
-      s.style.zIndex = active ? '2' : '1';
-    });
-    if (indicators.length === slides.length) {
-      indicators.forEach((btn, i) => {
-        const active = i === index;
-        btn.classList.toggle('active', active);
-        btn.setAttribute('aria-selected', active ? 'true' : 'false');
-      });
-    }
-    current = index;
-  }
-
-  function next() { show(current + 1); }
-  function prev() { show(current - 1); }
-
-  // 绑定按钮事件（不修改按钮结构）
-  if (nextBtn) nextBtn.addEventListener('click', () => { next(); resetTimer(); });
-  if (prevBtn) prevBtn.addEventListener('click', () => { prev(); resetTimer(); });
-
-  // 仅在 indicators 数量与 slides 匹配时绑定（避免错误）
-  if (indicators.length === slides.length) {
-    indicators.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const idx = Number(btn.dataset.index);
-        if (!isNaN(idx)) { show(idx); resetTimer(); }
+      scripts.forEach((file) => {
+        const script = document.createElement('script');
+        script.src = `${base}/${file}`;
+        script.async = true;
+        script.onload = () => {
+          loaded += 1;
+          if (loaded === scripts.length) finish();
+        };
+        script.onerror = () => reject(new Error(`加载 Firebase SDK 失败: ${file}`));
+        document.head.appendChild(script);
       });
     });
+
+    return window._firebaseInitPromise;
   }
 
-  // 使轮播可被键盘操作
-  carousel.setAttribute('tabindex','0');
-  carousel.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { prev(); resetTimer(); }
-    if (e.key === 'ArrowRight') { next(); resetTimer(); }
-  });
-
-  function startTimer() { if (timer) return; if (slides.length > 1) timer = setInterval(next, interval); }
-  function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
-  function resetTimer() { stopTimer(); startTimer(); }
-
-  carousel.addEventListener('mouseenter', stopTimer);
-  carousel.addEventListener('mouseleave', startTimer);
-  carousel.addEventListener('focusin', stopTimer);
-  carousel.addEventListener('focusout', startTimer);
-
-  // 初始化显示并启动定时器（仅在多张时）
-  show(current);
-  startTimer();
-});
-
-/* ---------- 认证状态管理（简单的 localStorage 模拟） ---------- */
-// 公开函数，其他页面可调用
-window.getStoredUser = function(){
-  try{ const s = localStorage.getItem('kmnzUser'); return s? JSON.parse(s): null; }catch(e){return null}
-};
-// 简单的用户库管理（用于本地模拟多用户注册）
-window.getUsers = function(){
-  try{ const s = localStorage.getItem('kmnzUsers'); return s? JSON.parse(s): []; }catch(e){ return []; }
-};
-window.saveUsers = function(users){
-  try{ localStorage.setItem('kmnzUsers', JSON.stringify(users||[])); }catch(e){}
-};
-
-window.loginUser = function(user){
-  // user: {id: 'email', name?: '昵称', avatar: 'assets/...'} — 将当前登录用户写入 kmnzUser，并在 kmnzUsers 中 upsert
-  try{ localStorage.setItem('kmnzUser', JSON.stringify(user)); }catch(e){}
-  try{
-    if(user && user.id){
-      const users = window.getUsers();
-      const idx = users.findIndex(u=>String(u.id)===String(user.id));
-      if(idx >= 0) users[idx] = Object.assign({}, users[idx], user);
-      else users.push(Object.assign({}, user));
-      window.saveUsers(users);
-    }
-  }catch(e){}
-  if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
-};
-
-window.logoutUser = function(){
-  try{ localStorage.removeItem('kmnzUser'); }catch(e){}
-  if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
-  // 注销后跳转到登录页面
-  try{ location.href = 'auth.html#login'; }catch(e){}
-};
-
-window.updateAuthUI = function(){
-  const user = window.getStoredUser();
-  const authBtn = document.getElementById('nav-auth-btn');
-  const userBox = document.getElementById('nav-user');
-  if(user){
-    if(authBtn) authBtn.hidden = true;
-    if(userBox){
-      userBox.hidden = false;
-      userBox.dataset.logged = '1';
-      const img = document.getElementById('nav-user-avatar');
-      const idSpan = document.getElementById('nav-user-id');
-      if(img && user.avatar) img.src = user.avatar;
-      if(idSpan) idSpan.textContent = user.id || '';
-    }
-  } else {
-    // 未登录：隐藏用户信息区域，仅显示登录/注册按钮
-    if(authBtn) authBtn.hidden = false;
-    if(userBox){
-      userBox.hidden = true;
-      userBox.dataset.logged = '0';
-      const img = document.getElementById('nav-user-avatar');
-      const idSpan = document.getElementById('nav-user-id');
-      if(img) img.src = 'assets/images/default4.png';
-      if(idSpan) idSpan.textContent = '';
+  window.getStoredUser = function () {
+    try {
+      const raw = localStorage.getItem('kmnzUser');
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
     }
   };
-};
 
-// 当 DOM 准备好后绑定按钮动作并运行一次更新
-document.addEventListener('DOMContentLoaded', function(){
-  const authBtn = document.getElementById('nav-auth-btn');
-  const signout = document.getElementById('nav-signout');
-  if(authBtn){ authBtn.addEventListener('click', ()=>{ location.href = 'auth.html#login'; }); }
-  if(signout){ signout.addEventListener('click', ()=>{ window.logoutUser(); }); }
-  // 首次渲染
-  if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
-});
-
-  // 增加用户菜单（头像编辑已移至 user.html）
-document.addEventListener('DOMContentLoaded', function(){
-  const userBox = document.getElementById('nav-user');
-  if(!userBox) return;
-
-  // 点击头像或 id：未登录时跳转到登录页，已登录时进入个人页面
-  userBox.addEventListener('click', (e)=>{
-    // 如果点击退出按钮则忽略（已有绑定）
-    if(e.target && (e.target.id === 'nav-signout' || e.target.closest('#nav-signout'))) return;
-    const user = window.getStoredUser();
-    if(!user){
-      // 未登录：前往登录页面
-      location.href = 'auth.html#login';
-      return;
+  window.getUsers = function () {
+    try {
+      const raw = localStorage.getItem('kmnzUsers');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
     }
-    // 已登录：前往个人页，个人页提供头像编辑
-    location.href = 'user.html';
-  });
+  };
 
-  // 构建菜单项
-  let menu = userBox.querySelector('.user-menu');
-  if(!menu){
-    menu = document.createElement('div'); menu.className = 'user-menu';
-    menu.innerHTML = `
-      <a href="#" id="menu-profile">查看资料</a>
-      <button id="menu-edit-avatar">编辑头像</button>
-    `;
-    userBox.appendChild(menu);
+  window.saveUsers = function (users) {
+    try {
+      localStorage.setItem('kmnzUsers', JSON.stringify(users || []));
+    } catch (e) {}
+  };
+
+  window.loginUser = function (user) {
+    try {
+      localStorage.setItem('kmnzUser', JSON.stringify(user));
+    } catch (e) {}
+
+    try {
+      if (user && user.id) {
+        const users = window.getUsers();
+        const index = users.findIndex((item) => String(item.id) === String(user.id));
+        if (index >= 0) users[index] = Object.assign({}, users[index], user);
+        else users.push(Object.assign({}, user));
+        window.saveUsers(users);
+      }
+    } catch (e) {}
+
+    if (typeof window.updateAuthUI === 'function') window.updateAuthUI();
+  };
+
+  window.logoutUser = function () {
+    try {
+      localStorage.removeItem('kmnzUser');
+    } catch (e) {}
+    if (typeof window.updateAuthUI === 'function') window.updateAuthUI();
+    location.href = 'auth.html#login';
+  };
+
+  window.updateAuthUI = function () {
+    const user = window.getStoredUser();
+    const authButton = document.getElementById('nav-auth-btn');
+    const userBox = document.getElementById('nav-user');
+    const avatar = document.getElementById('nav-user-avatar');
+    const id = document.getElementById('nav-user-id');
+
+    if (authButton) authButton.hidden = Boolean(user);
+    if (!userBox) return;
+
+    userBox.hidden = !user;
+    userBox.dataset.logged = user ? '1' : '0';
+    if (avatar) avatar.src = user && user.avatar ? user.avatar : DEFAULT_AVATAR;
+    if (id) id.textContent = user ? (user.name || user.id || '') : '';
+  };
+
+  function bindNav() {
+    const navToggle = document.getElementById('nav-toggle');
+    const siteNav = document.getElementById('site-nav');
+
+    if (siteNav) {
+      addSongcoverLink(siteNav);
+      addThemeToggle(siteNav);
+    }
+
+    if (navToggle && siteNav) {
+      navToggle.addEventListener('click', () => {
+        const next = siteNav.getAttribute('data-visible') !== 'true';
+        siteNav.setAttribute('data-visible', String(next));
+        navToggle.setAttribute('aria-expanded', String(next));
+      });
+    }
+
+    const authButton = document.getElementById('nav-auth-btn');
+    const signoutButton = document.getElementById('nav-signout');
+    const userBox = document.getElementById('nav-user');
+
+    if (authButton) authButton.addEventListener('click', () => { location.href = 'auth.html#login'; });
+    if (signoutButton) signoutButton.addEventListener('click', () => window.logoutUser());
+    if (userBox) {
+      userBox.addEventListener('click', (event) => {
+        if (event.target.closest('#nav-signout')) return;
+        location.href = window.getStoredUser() ? 'user.html' : 'auth.html#login';
+      });
+    }
+
+    window.updateAuthUI();
   }
 
-  // 点击菜单项处理
-  menu.querySelector('#menu-profile').addEventListener('click', (e)=>{
-    e.preventDefault();
-    const user = window.getStoredUser();
-    if(user){
-      location.href = 'user.html';
+  function addSongcoverLink(siteNav) {
+    const exists = Array.from(siteNav.querySelectorAll('a')).some((link) => /songcover\.html$/.test(link.getAttribute('href') || ''));
+    if (exists) return;
+
+    const links = Array.from(siteNav.querySelectorAll('a'));
+    const membersLink = links.find((link) => /members\.html$/.test(link.getAttribute('href') || ''));
+    const songLink = document.createElement('a');
+    songLink.href = 'songcover.html';
+    songLink.textContent = '歌回';
+    songLink.setAttribute('aria-label', '歌回');
+
+    if (membersLink && membersLink.parentNode) {
+      membersLink.parentNode.insertBefore(songLink, membersLink.nextSibling);
     } else {
-      alert('未登录');
+      siteNav.appendChild(songLink);
     }
-    userBox.classList.remove('open');
-  });
-
-  menu.querySelector('#menu-edit-avatar').addEventListener('click', (e)=>{
-    e.preventDefault();
-    userBox.classList.remove('open');
-    location.href = 'user.html';
-  });
-
-  // 绑定注册表单内交互：密码强度与匹配
-  const pwd = document.getElementById('reg-password');
-  const pwd2 = document.getElementById('reg-password2');
-  const pwdBar = document.getElementById('pwd-bar');
-  const matchMeta = document.getElementById('match-meta');
-
-  function calcStrength(s){
-    if(!s) return 0;
-    let score = 0;
-    if(s.length >= 8) score += 1;
-    if(/[A-Z]/.test(s)) score += 1;
-    if(/[0-9]/.test(s)) score += 1;
-    if(/[^A-Za-z0-9]/.test(s)) score += 1;
-    return score;
   }
-  if(pwd){ pwd.addEventListener('input', ()=>{
-    const v = pwd.value||''; const s = calcStrength(v); const pct = (s/4)*100; if(pwdBar) pwdBar.style.width = pct+'%';
-  }); }
-  if(pwd2){ pwd2.addEventListener('input', ()=>{
-    const v1 = pwd.value||''; const v2 = pwd2.value||'';
-    if(!v2) matchMeta.textContent = '';
-    else if(v1 === v2) { matchMeta.textContent = '两次密码匹配'; matchMeta.style.color = '#2e7d32'; }
-    else { matchMeta.textContent = '两次密码不一致'; matchMeta.style.color = '#c0392b'; }
-  }); }
 
-  
+  function addThemeToggle(siteNav) {
+    if (!window.KMNZTheme || document.getElementById('theme-toggle')) return;
+    const button = document.createElement('button');
+    button.id = 'theme-toggle';
+    button.type = 'button';
+    button.className = 'theme-toggle';
+    siteNav.appendChild(button);
+    button.addEventListener('click', () => window.KMNZTheme.toggle());
+    window.KMNZTheme.apply(window.KMNZTheme.current());
+  }
 
-  // 关闭菜单时点击文档任意处
-  document.addEventListener('click', (e)=>{
-    if(!userBox.contains(e.target)) userBox.classList.remove('open');
-  });
-});
+  function showAuthPanel(name) {
+    const loginPanel = document.getElementById('panel-login');
+    const registerPanel = document.getElementById('panel-register');
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    if (!tabLogin || !tabRegister || !loginPanel || !registerPanel) return;
 
-// 头像编辑已搬移到 user.html，页面脚本会复用 `window.processAvatarFile` 和 `window.loginUser`。
+    const isRegister = name === 'register';
+    loginPanel.hidden = isRegister;
+    registerPanel.hidden = !isRegister;
+    tabLogin.classList.toggle('active', !isRegister);
+    tabRegister.classList.toggle('active', isRegister);
+    tabLogin.setAttribute('aria-selected', String(!isRegister));
+    tabRegister.setAttribute('aria-selected', String(isRegister));
+  }
 
-/* 默认头像集合：使用工作区内现有图片作为随机分配池 */
-window.defaultAvatars = [
-  'assets/images/Lita.PNG',
-  'assets/images/Tina.PNG',
-  'assets/images/Nero.PNG',
-  'assets/images/default4.png' /* 占位：可替换为你上传的图片 */
-];
+  function bindAuthForms() {
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    if (!tabLogin || !tabRegister) return;
 
-// 接收 File 对象，返回压缩/缩放后的 dataURL，限制尺寸与大小
-window.processAvatarFile = function(file, opts){
-  const maxDim = (opts && opts.maxDim) || 256; // px
-  const maxBytes = (opts && opts.maxBytes) || 150 * 1024; // bytes
+    showAuthPanel(location.hash.replace('#', '') === 'register' ? 'register' : 'login');
+    tabLogin.addEventListener('click', () => {
+      showAuthPanel('login');
+      location.hash = 'login';
+    });
+    tabRegister.addEventListener('click', () => {
+      showAuthPanel('register');
+      location.hash = 'register';
+    });
 
-  return new Promise((resolve, reject)=>{
-    if(!file || !file.type.startsWith('image/')) return reject(new Error('不是图片文件'));
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      const img = new Image();
-      img.onload = ()=>{
-        let w = img.width, h = img.height;
-        const ratio = Math.min(1, maxDim / Math.max(w, h));
-        w = Math.round(w * ratio); h = Math.round(h * ratio);
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
+    bindLoginForm();
+    bindRegisterForm();
+    bindPasswordHelpers();
+  }
 
-        // 优先尝试 WebP 导出（更小），若不支持或大小仍超限则回退到 JPEG
-        const tryExport = (mime, quality)=>{
-          try{
-            const dataUrl = canvas.toDataURL(mime, quality);
-            const b64 = dataUrl.split(',')[1] || '';
-            const byteLen = Math.ceil(b64.length * 3 / 4);
-            return { dataUrl, byteLen };
-          }catch(e){
-            return null;
-          }
-        };
+  function bindLoginForm() {
+    const form = document.getElementById('login-form');
+    if (!form) return;
 
-        // 尝试 WebP
-        const webpSupportTest = (()=>{
-          try{
-            const testCanvas = document.createElement('canvas');
-            return !!(testCanvas.toDataURL && testCanvas.toDataURL('image/webp').indexOf('data:image/webp') === 0);
-          }catch(e){ return false; }
-        })();
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const status = document.getElementById('login-status');
+      const email = (document.getElementById('login-email').value || '').trim();
+      const password = document.getElementById('login-password').value || '';
 
-        let quality = 0.92;
-        const mimeCandidates = webpSupportTest ? ['image/webp','image/jpeg'] : ['image/jpeg'];
+      if (!email) return setStatus(status, '请填写邮箱。', 'error');
+      if (!password) return setStatus(status, '请填写密码。', 'error');
 
-        (function tryLoop(){
-          for(const mime of mimeCandidates){
-            const res = tryExport(mime, quality);
-            if(res){
-              if(res.byteLen <= maxBytes || quality <= 0.5){
-                return resolve(res.dataUrl);
-              }
+      if (getFirebaseConfig()) {
+        ensureFirebase()
+          .then(() => window.firebase.auth().signInWithEmailAndPassword(email, password))
+          .then((credential) => {
+            const fbUser = credential.user;
+            const user = {
+              id: fbUser.email || fbUser.uid,
+              name: fbUser.displayName || fbUser.email || email,
+              avatar: fbUser.photoURL || randomAvatar()
+            };
+            window.loginUser(user);
+            setStatus(status, '登录成功，1 秒后跳转到首页...', 'success');
+            setTimeout(() => { location.href = 'index.html'; }, 1000);
+          })
+          .catch((error) => setStatus(status, error && error.message ? error.message : '登录失败。', 'error'));
+        return;
+      }
+
+      const matched = window.getUsers().find((user) => String(user.id) === String(email));
+      if (!matched) return setStatus(status, '该账户不存在，请先注册。', 'error');
+      if (!matched.password) return setStatus(status, '该账户未设置密码，请重新注册。', 'error');
+      if (matched.password !== password) return setStatus(status, '密码错误。', 'error');
+
+      window.loginUser({
+        id: email,
+        name: matched.name || email,
+        avatar: matched.avatar || randomAvatar()
+      });
+      setStatus(status, '登录成功，1 秒后跳转到首页...', 'success');
+      setTimeout(() => { location.href = 'index.html'; }, 1000);
+    });
+  }
+
+  function bindRegisterForm() {
+    const form = document.getElementById('register-form');
+    if (!form) return;
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const status = document.getElementById('reg-status');
+      const success = document.getElementById('reg-success');
+      const name = (document.getElementById('reg-name').value || '').trim();
+      const email = (document.getElementById('reg-email').value || '').trim();
+      const password = document.getElementById('reg-password').value || '';
+      const confirm = document.getElementById('reg-password2').value || '';
+      const avatar = randomAvatar();
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (success) success.hidden = true;
+      if (!name) return setStatus(status, '请填写昵称。', 'error');
+      if (!email) return setStatus(status, '请填写邮箱。', 'error');
+      if (!emailPattern.test(email)) return setStatus(status, '请输入有效的邮箱地址。', 'error');
+      if (password.length < 8) return setStatus(status, '密码长度至少 8 位。', 'error');
+      if (password !== confirm) return setStatus(status, '两次密码不一致。', 'error');
+
+      if (getFirebaseConfig()) {
+        ensureFirebase()
+          .then(() => window.firebase.auth().createUserWithEmailAndPassword(email, password))
+          .then((credential) => {
+            const fbUser = credential.user;
+            if (fbUser && fbUser.updateProfile) {
+              fbUser.updateProfile({ displayName: name, photoURL: avatar }).catch(() => {});
+            }
+            window.loginUser({ id: fbUser.email || fbUser.uid, name, avatar });
+            setStatus(status, '', 'success');
+            if (success) {
+              success.hidden = false;
+              success.textContent = '注册成功，已自动登录，1 秒后跳转...';
+            }
+            setTimeout(() => { location.href = 'user.html'; }, 1000);
+          })
+          .catch((error) => setStatus(status, error && error.message ? error.message : '注册失败。', 'error'));
+        return;
+      }
+
+      const users = window.getUsers();
+      if (users.some((user) => String(user.id) === String(email))) {
+        return setStatus(status, '该邮箱已被注册。', 'error');
+      }
+
+      window.loginUser({ id: email, name, avatar, password });
+      setStatus(status, '', 'success');
+      if (success) {
+        success.hidden = false;
+        success.textContent = '注册成功，已自动登录，1 秒后跳转...';
+      }
+      setTimeout(() => { location.href = 'user.html'; }, 1000);
+    });
+  }
+
+  function bindPasswordHelpers() {
+    const password = document.getElementById('reg-password');
+    const confirm = document.getElementById('reg-password2');
+    const bar = document.getElementById('pwd-bar');
+    const matchMeta = document.getElementById('match-meta');
+
+    if (password && bar) {
+      password.addEventListener('input', () => {
+        const value = password.value || '';
+        let score = 0;
+        if (value.length >= 8) score += 1;
+        if (/[A-Z]/.test(value)) score += 1;
+        if (/[0-9]/.test(value)) score += 1;
+        if (/[^A-Za-z0-9]/.test(value)) score += 1;
+        bar.style.width = `${(score / 4) * 100}%`;
+      });
+    }
+
+    if (password && confirm && matchMeta) {
+      confirm.addEventListener('input', () => {
+        if (!confirm.value) return setStatus(matchMeta, '', null);
+        if (password.value === confirm.value) return setStatus(matchMeta, '两次密码匹配。', 'success');
+        return setStatus(matchMeta, '两次密码不一致。', 'error');
+      });
+    }
+  }
+
+  function bindResetForm() {
+    const form = document.getElementById('reset-form');
+    if (!form) return;
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const status = document.getElementById('reset-status');
+      const email = (document.getElementById('reset-email').value || '').trim();
+      const password = document.getElementById('reset-password').value || '';
+      const confirm = document.getElementById('reset-password2').value || '';
+
+      if (!email) return setStatus(status, '请填写邮箱。', 'error');
+      if (password.length < 8) return setStatus(status, '密码长度至少 8 位。', 'error');
+      if (password !== confirm) return setStatus(status, '两次密码不一致。', 'error');
+
+      const users = window.getUsers();
+      const index = users.findIndex((user) => String(user.id) === String(email));
+      if (index < 0) return setStatus(status, '该账户不存在。', 'error');
+
+      users[index].password = password;
+      window.saveUsers(users);
+      window.loginUser({
+        id: users[index].id,
+        name: users[index].name || users[index].id,
+        avatar: users[index].avatar || randomAvatar()
+      });
+      setStatus(status, '密码已重置并已登录，1 秒后跳转到首页...', 'success');
+      setTimeout(() => { location.href = 'index.html'; }, 1000);
+    });
+  }
+
+  function renderMembersGrid() {
+    const grid = document.getElementById('members-grid');
+    if (!grid || !window.members) return;
+
+    grid.innerHTML = '';
+    window.members.forEach((member) => {
+      const link = document.createElement('a');
+      link.className = 'member-link';
+      link.href = `member${member.id}.html`;
+      link.setAttribute('aria-label', `查看 ${member.name} 的资料`);
+
+      const card = document.createElement('div');
+      card.className = 'member-card';
+
+      const photo = document.createElement('div');
+      photo.className = 'member-photo';
+      const image = document.createElement('img');
+      image.src = member.photo;
+      image.alt = member.name;
+      image.loading = 'lazy';
+      photo.appendChild(image);
+
+      const name = document.createElement('div');
+      name.className = 'member-name';
+      name.textContent = member.name;
+
+      card.append(photo, name);
+      link.appendChild(card);
+      grid.appendChild(link);
+    });
+  }
+
+  function bindMemberPhotoStates() {
+    document.querySelectorAll('.member-photo').forEach((photo) => {
+      photo.addEventListener('mousedown', () => photo.classList.add('dragging'));
+      photo.addEventListener('mouseup', () => photo.classList.remove('dragging'));
+      photo.addEventListener('mouseleave', () => photo.classList.remove('dragging'));
+      photo.addEventListener('touchstart', () => photo.classList.add('dragging'), { passive: true });
+      photo.addEventListener('touchend', () => photo.classList.remove('dragging'));
+    });
+  }
+
+  function initCarousel() {
+    const carousel = document.querySelector('.hero-carousel');
+    if (!carousel || carousel.dataset.carouselInitialized) return;
+    carousel.dataset.carouselInitialized = '1';
+
+    const slides = Array.from(carousel.querySelectorAll('.slide'));
+    if (!slides.length) return;
+
+    const prevButton = carousel.querySelector('.carousel-control.prev');
+    const nextButton = carousel.querySelector('.carousel-control.next');
+    const indicatorsContainer = carousel.querySelector('.carousel-indicators');
+    const letters = ['K', 'M', 'N', 'Z'];
+    let current = Math.max(0, slides.findIndex((slide) => slide.classList.contains('active')));
+    let timer = null;
+    const interval = Number(carousel.dataset.interval) > 0 ? Number(carousel.dataset.interval) : 4000;
+
+    if (indicatorsContainer) {
+      indicatorsContainer.innerHTML = '';
+      slides.forEach((slide, index) => {
+        const button = document.createElement('button');
+        button.className = 'indicator';
+        button.type = 'button';
+        button.dataset.index = String(index);
+        button.setAttribute('role', 'tab');
+        button.setAttribute('aria-label', `第 ${index + 1} 张`);
+        button.textContent = letters[index % letters.length];
+        indicatorsContainer.appendChild(button);
+      });
+    }
+
+    const indicators = Array.from(carousel.querySelectorAll('.indicator'));
+
+    function show(index) {
+      current = ((index % slides.length) + slides.length) % slides.length;
+      slides.forEach((slide, slideIndex) => {
+        const active = slideIndex === current;
+        slide.classList.toggle('active', active);
+        slide.setAttribute('aria-hidden', String(!active));
+      });
+      indicators.forEach((button, buttonIndex) => {
+        const active = buttonIndex === current;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-selected', String(active));
+      });
+    }
+
+    function next() {
+      show(current + 1);
+    }
+
+    function prev() {
+      show(current - 1);
+    }
+
+    function start() {
+      if (!timer && slides.length > 1) timer = setInterval(next, interval);
+    }
+
+    function stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+    }
+
+    function restart() {
+      stop();
+      start();
+    }
+
+    if (prevButton) prevButton.addEventListener('click', () => { prev(); restart(); });
+    if (nextButton) nextButton.addEventListener('click', () => { next(); restart(); });
+    indicators.forEach((button) => {
+      button.addEventListener('click', () => {
+        show(Number(button.dataset.index));
+        restart();
+      });
+    });
+
+    carousel.tabIndex = 0;
+    carousel.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowLeft') { prev(); restart(); }
+      if (event.key === 'ArrowRight') { next(); restart(); }
+    });
+    carousel.addEventListener('mouseenter', stop);
+    carousel.addEventListener('mouseleave', start);
+    carousel.addEventListener('focusin', stop);
+    carousel.addEventListener('focusout', start);
+
+    show(current);
+    start();
+  }
+
+  window.processAvatarFile = function (file, opts) {
+    const maxDim = (opts && opts.maxDim) || 256;
+    const maxBytes = (opts && opts.maxBytes) || 150 * 1024;
+
+    return new Promise((resolve, reject) => {
+      if (!file || !file.type.startsWith('image/')) return reject(new Error('不是图片文件。'));
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.onload = () => {
+          let width = image.width;
+          let height = image.height;
+          const ratio = Math.min(1, maxDim / Math.max(width, height));
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(image, 0, 0, width, height);
+
+          const supportsWebp = (() => {
+            try {
+              return document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp') === 0;
+            } catch (e) {
+              return false;
+            }
+          })();
+
+          const mimes = supportsWebp ? ['image/webp', 'image/jpeg'] : ['image/jpeg'];
+          let quality = 0.92;
+
+          function exportImage(mime, q) {
+            try {
+              const dataUrl = canvas.toDataURL(mime, q);
+              const body = dataUrl.split(',')[1] || '';
+              return { dataUrl, bytes: Math.ceil(body.length * 3 / 4) };
+            } catch (e) {
+              return null;
             }
           }
-          quality = Math.max(0.5, quality - 0.12);
-          if(quality <= 0.5) {
-            // 最终回退到 JPEG 最低质量
-            const final = tryExport('image/jpeg', 0.5);
-            if(final) return resolve(final.dataUrl);
-            return resolve(canvas.toDataURL());
-          }
-          setTimeout(tryLoop,0);
-        })();
-      };
-      img.onerror = ()=> reject(new Error('无法加载图片'));
-      img.src = reader.result;
-    };
-    reader.onerror = ()=> reject(new Error('读取文件失败'));
-    reader.readAsDataURL(file);
-  });
-};
 
-// 重置密码处理：在 reset.html 上绑定，修改 localStorage 中的用户密码并登录
-document.addEventListener('DOMContentLoaded', function(){
-  const resetForm = document.getElementById('reset-form');
-  if(!resetForm) return;
-  resetForm.addEventListener('submit', function(e){
-    e.preventDefault();
-    const status = document.getElementById('reset-status');
-    function fail(msg){ if(status){ status.textContent = msg; status.style.color = '#c0392b'; } return false; }
-    const email = (document.getElementById('reset-email').value || '').trim();
-    const p = (document.getElementById('reset-password').value || '');
-    const p2 = (document.getElementById('reset-password2').value || '');
-    if(!email) return fail('请填写邮箱或用户名。');
-    if(p.length < 8) return fail('密码长度至少 8 位。');
-    if(p !== p2) return fail('两次密码不一致。');
-    const users = window.getUsers();
-    const idx = users.findIndex(u => String(u.id) === String(email));
-    if(idx < 0) return fail('该账户不存在。');
-    // 更新密码并保存
-    users[idx].password = p;
-    window.saveUsers(users);
-    // 登录该用户
-    const matched = users[idx];
-    const avatar = matched.avatar || (window.defaultAvatars && window.defaultAvatars.length ? window.defaultAvatars[0] : 'assets/images/default4.png');
-    const user = { id: matched.id, name: matched.name || matched.id, avatar };
-    window.loginUser(user);
-    if(status){ status.style.color = ''; status.textContent = '密码已重置并已登录，1 秒后跳转到首页…'; }
-    setTimeout(()=>{ location.href = 'index.html'; }, 1000);
+          while (quality >= 0.5) {
+            for (const mime of mimes) {
+              const result = exportImage(mime, quality);
+              if (result && result.bytes <= maxBytes) return resolve(result.dataUrl);
+            }
+            quality -= 0.12;
+          }
+
+          const fallback = exportImage('image/jpeg', 0.5);
+          resolve(fallback ? fallback.dataUrl : canvas.toDataURL());
+        };
+        image.onerror = () => reject(new Error('无法加载图片。'));
+        image.src = reader.result;
+      };
+      reader.onerror = () => reject(new Error('读取文件失败。'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  onReady(() => {
+    bindNav();
+    bindAuthForms();
+    bindResetForm();
+    renderMembersGrid();
+    bindMemberPhotoStates();
+    initCarousel();
   });
-});
+})();

@@ -4,37 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>关于 — KMNZ</title>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
-  <script>
-  (function(){
-    try{
-      var t = localStorage.getItem('kmnzTheme');
-      if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
-      document.documentElement.setAttribute('data-theme', t || 'light');
-      var dark = (t === 'dark');
-      var vars = {
-        '--bg': dark? '#0b1116' : '#ffffff',
-        '--surface': dark? '#0f1720' : '#ffffff',
-        '--text': dark? '#e6eef8' : '#222222',
-        '--muted': dark? '#9aa6b2' : '#666',
-        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
-        '--accent': dark? '#59a6ff' : '#1e88e5',
-        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
-        '--hero-foreground': '#ffffff'
-      };
-      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
-    }catch(e){}
-  })();
-  </script>
-  <style>
-    .about-grid{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
-    .qr-box img{width:220px;height:220px;object-fit:contain;border-radius:8px;border:1px solid var(--border);background:var(--surface);padding:8px}
-    .links-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:12px}
-    .link-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none}
-    .link-btn:hover{box-shadow:0 6px 18px rgba(0,0,0,0.06)}
-    .link-icon{width:20px;height:20px;display:inline-block;flex:0 0 20px}
-    .about-note{color:var(--muted);margin-top:8px}
-  </style>
+  <link rel="icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo.png">
+  <meta name="theme-color" content="#ffffff">
 </head>
 <body>
   <header class="site-header">
@@ -56,12 +32,12 @@
     </div>
   </header>
 
-  <main class="container" style="padding:24px 0">
+  <main class="container page-section">
     <h2>联系我们 & 相关链接</h2>
     
     <div class="about-grid">
       <div class="qr-box">
-        <div style="font-weight:1;margin-bottom:0px">KMNHZ-China</div>
+        <div class="about-brand">KMNHZ-China</div>
         <img src="assets/images/qq.jpg" alt="KMNHZ-China">
         <a class="link-btn" href="https://space.bilibili.com/2149710?spm_id_from=333.337.search-card.all.click" target="_blank" rel="noopener noreferrer">
             <span class="link-icon">B</span><span>KMNHZ-China</span>
@@ -70,14 +46,14 @@
         
       </div>
       <div>
-        <div style="margin-bottom:8px">也可以直接访问KMNZ的官方页面或社交帐号：</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="about-intro">也可以直接访问KMNZ的官方页面或社交帐号：</div>
+        <div class="about-link-row">
          
         </div>
 
         <div class="links-grid">
-             <a class="link-btn" href="https://www.youtube.com/@KMNZ" target="_blank" rel="noopener noreferrer"><span class="link-icon">▶️</span><span>KMNZ OFFICIAL</span></a>
-             <a class="link-btn" href="https://www.youtube.com/@KMNZOFFICIAL" target="_blank" rel="noopener noreferrer"><span class="link-icon">▶️</span><span>KMNZ Membership</span></a>
+             <a class="link-btn" href="https://www.youtube.com/@KMNZOFFICIAL" target="_blank" rel="noopener noreferrer"><span class="link-icon">▶️</span><span>KMNZ OFFICIAL</span></a>
+             <a class="link-btn" href="https://www.youtube.com/@KMNZ" target="_blank" rel="noopener noreferrer"><span class="link-icon">▶️</span><span>KMNZ Membership</span></a>
              <a class="link-btn" href="https://x.com/KMNSTREET" target="_blank" rel="noopener noreferrer"><span class="link-icon">X</span><span>KMNZ OFFICIAL</span></a>
              <a class="link-btn" href="https://twitter.com/kmnzlita" target="_blank" rel="noopener noreferrer"><span class="link-icon">X</span><span>LITA</span></a>
              <a class="link-btn" href="https://twitter.com/kmnztina_" target="_blank" rel="noopener noreferrer"><span class="link-icon">X</span><span>TINA</span></a>
@@ -90,9 +66,9 @@
           
         </div>
 
-        <div style="margin-top:14px">
-          <div style="font-weight:600;margin-bottom:6px">全部链接预览</div>
-          <img src="assets/images/link.png" alt="链接一览" style="max-width:360px;border:1px solid var(--border);border-radius:8px;background:var(--surface);padding:8px">
+        <div class="link-preview">
+          <div class="link-preview-title">全部链接预览</div>
+          <img class="link-preview-image" src="assets/images/link.png" alt="链接一览">
         </div>
       </div>
     </div>
@@ -100,6 +76,7 @@
 
   <footer class="site-footer"><div class="container">© 2025 KMNHZ-China</div></footer>
 
+  <script src="js/config.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

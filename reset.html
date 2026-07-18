@@ -4,28 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>重置密码 — KMNZ</title>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
-  <script>
-  (function(){
-    try{
-      var t = localStorage.getItem('kmnzTheme');
-      if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
-      document.documentElement.setAttribute('data-theme', t || 'light');
-      var dark = (t === 'dark');
-      var vars = {
-        '--bg': dark? '#0b1116' : '#ffffff',
-        '--surface': dark? '#0f1720' : '#ffffff',
-        '--text': dark? '#e6eef8' : '#222222',
-        '--muted': dark? '#9aa6b2' : '#666',
-        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
-        '--accent': dark? '#59a6ff' : '#1e88e5',
-        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
-        '--hero-foreground': '#ffffff'
-      };
-      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
-    }catch(e){}
-  })();
-  </script>
+  <link rel="icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo.png">
+  <meta name="theme-color" content="#ffffff">
 </head>
 <body>
   <header class="site-header">
@@ -47,10 +32,10 @@
     </div>
   </header>
 
-  <main class="container" style="padding:24px 0">
+  <main class="container page-section">
     <h2>重置密码</h2>
     <p class="help">请输入注册时使用的邮箱或用户名，并填写新密码（示例中密码将保存在浏览器 localStorage）。</p>
-    <form id="reset-form" class="card" style="padding:16px;max-width:640px">
+    <form id="reset-form" class="card reset-card">
       <div class="field">
         <label for="reset-email">邮箱 / 用户名</label>
         <input type="email" id="reset-email" placeholder="you@example.com" required aria-required="true">
@@ -63,15 +48,13 @@
         <label for="reset-password2">确认新密码</label>
         <input type="password" id="reset-password2" required aria-required="true">
       </div>
-      <div style="margin-top:12px"><button type="submit">重置并登录</button></div>
-      <div id="reset-status" class="help" style="margin-top:8px"></div>
+      <div class="form-action"><button type="submit">重置并登录</button></div>
+      <div id="reset-status" class="status-line form-note"></div>
     </form>
   </main>
 
   <footer class="site-footer"><div class="container">© 2025 KMNHZ-China</div></footer>
+  <script src="js/config.js"></script>
   <script src="js/main.js"></script>
-  <script>
-    // 页面内的交互由 js/main.js 的 reset-form 处理（重复绑定安全）
-  </script>
 </body>
 </html>

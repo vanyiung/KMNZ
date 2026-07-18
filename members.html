@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>KMNZ — 成员</title>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <meta name="description" content="KMNZ 成员索引页 — 点击头像查看详细资料。">
   <meta name="robots" content="index,follow">
@@ -25,28 +26,6 @@
   <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo.png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo.png">
   <meta name="theme-color" content="#ffffff">
-    <script>
-    (function(){
-      try{
-        var t = localStorage.getItem('kmnzTheme');
-        if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
-        document.documentElement.setAttribute('data-theme', t || 'light');
-        var dark = (t === 'dark');
-        var vars = {
-          '--bg': dark? '#0b1116' : '#ffffff',
-          '--surface': dark? '#0f1720' : '#ffffff',
-          '--text': dark? '#e6eef8' : '#222222',
-          '--muted': dark? '#9aa6b2' : '#666',
-          '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
-          '--accent': dark? '#59a6ff' : '#1e88e5',
-          '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
-          '--hero-foreground': '#ffffff'
-        };
-        for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
-      }catch(e){}
-    })();
-    </script>
-  
 </head>
 <body>
   <a class="skip-link sr-only" href="#main-content">跳过到主要内容</a>
@@ -61,7 +40,7 @@
       <a href="about.html">关于</a>
       <button id="nav-auth-btn" class="nav-auth-btn" aria-haspopup="dialog">登录 / 注册</button>
       <div id="nav-user" class="nav-user" hidden>
-        <img id="nav-user-avatar" src="assets/images/avatar-default.png" alt="用户头像">
+        <img id="nav-user-avatar" src="assets/images/default4.png" alt="用户头像">
         <span id="nav-user-id"></span>
         <button id="nav-signout" class="nav-signout" aria-label="退出登录">退出</button>
       </div>
@@ -77,25 +56,25 @@
   <section class="members-grid" id="members-grid">
     <a class="member-link" href="member1.html" aria-label="查看 LITA 的资料">
       <div class="member-card">
-        <div class="member-photo"><img src="assets/images/member1.png" alt="LITA"></div>
+        <div class="member-photo"><img src="assets/images/member1.webp" alt="LITA"></div>
         <div class="member-name">LITA</div>
       </div>
     </a>
     <a class="member-link" href="member2.html" aria-label="查看 TINA 的资料">
       <div class="member-card">
-        <div class="member-photo"><img src="assets/images/member2.png" alt="TINA"></div>
+        <div class="member-photo"><img src="assets/images/member2.webp" alt="TINA"></div>
         <div class="member-name">TINA</div>
       </div>
     </a>
     <a class="member-link" href="member3.html" aria-label="查看 NERO 的资料">
       <div class="member-card">
-        <div class="member-photo"><img src="assets/images/member3.png" alt="NERO"></div>
+        <div class="member-photo"><img src="assets/images/member3.webp" alt="NERO"></div>
         <div class="member-name">NERO</div>
       </div>
     </a>
     <a class="member-link" href="member4.html" aria-label="查看 LIZ 的资料">
       <div class="member-card">
-        <div class="member-photo"><img src="assets/images/member4.png" alt="LIZ"></div>
+        <div class="member-photo"><img src="assets/images/member4.webp" alt="LIZ"></div>
         <div class="member-name">LIZ</div>
       </div>
     </a>
@@ -105,6 +84,8 @@
 <footer class="site-footer">
   <div class="container">© 2025 KMNHZ-China</div>
 </footer>
+<script src="js/config.js"></script>
+<script src="js/data.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

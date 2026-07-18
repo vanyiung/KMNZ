@@ -4,36 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>历程 — KMNZ</title>
-  <script>
-  (function(){
-    try{
-      var t = localStorage.getItem('kmnzTheme');
-      if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
-      document.documentElement.setAttribute('data-theme', t || 'light');
-      var dark = (t === 'dark');
-      var vars = {
-        '--bg': dark? '#0b1116' : '#ffffff',
-        '--surface': dark? '#0f1720' : '#ffffff',
-        '--text': dark? '#e6eef8' : '#222222',
-        '--muted': dark? '#9aa6b2' : '#666',
-        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
-        '--accent': dark? '#59a6ff' : '#1e88e5',
-        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
-        '--hero-foreground': '#ffffff'
-      };
-      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
-    }catch(e){}
-  })();
-  </script>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
   <meta name="description" content="KMNZ 的发展历程：成立、重要里程碑与回顾。">
   <meta name="robots" content="index,follow">
-  <link rel="canonical" href="about.html">
+  <link rel="canonical" href="history.html">
   <!-- Open Graph -->
   <meta property="og:title" content="历程 — KMNZ">
   <meta property="og:description" content="KMNZ 的发展历程：成立、重要里程碑与回顾。">
   <meta property="og:image" content="assets/images/kmnz.jpg">
-  <meta property="og:url" content="about.html">
+  <meta property="og:url" content="history.html">
   <meta property="og:type" content="website">
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
@@ -42,6 +22,9 @@
   <meta name="twitter:image" content="assets/images/kmnz.jpg">
   <!-- Favicon -->
   <link rel="icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo.png">
   <meta name="theme-color" content="#ffffff">
 </head>
 <body>
@@ -57,7 +40,7 @@
         <a href="about.html">关于</a>
         <button id="nav-auth-btn" class="nav-auth-btn" aria-haspopup="dialog">登录 / 注册</button>
         <div id="nav-user" class="nav-user" hidden>
-          <img id="nav-user-avatar" src="assets/images/avatar-default.png" alt="用户头像">
+          <img id="nav-user-avatar" src="assets/images/default4.png" alt="用户头像">
           <span id="nav-user-id"></span>
           <button id="nav-signout" class="nav-signout" aria-label="退出登录">退出</button>
         </div>
@@ -130,8 +113,9 @@
     </div>
   </main>
   <footer class="site-footer">
-    <div class="container">© 2025 KMNZ-China</div>
+    <div class="container">© 2025 KMNHZ-China</div>
   </footer>
+  <script src="js/config.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>

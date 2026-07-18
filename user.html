@@ -4,28 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>个人中心 — KMNZ</title>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/style.css">
-  <script>
-  (function(){
-    try{
-      var t = localStorage.getItem('kmnzTheme');
-      if(!t && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
-      document.documentElement.setAttribute('data-theme', t || 'light');
-      var dark = (t === 'dark');
-      var vars = {
-        '--bg': dark? '#0b1116' : '#ffffff',
-        '--surface': dark? '#0f1720' : '#ffffff',
-        '--text': dark? '#e6eef8' : '#222222',
-        '--muted': dark? '#9aa6b2' : '#666',
-        '--border': dark? 'rgba(255,255,255,0.06)' : '#eee',
-        '--accent': dark? '#59a6ff' : '#1e88e5',
-        '--hero-overlay': dark? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.36)',
-        '--hero-foreground': '#ffffff'
-      };
-      for(var k in vars) document.documentElement.style.setProperty(k, vars[k]);
-    }catch(e){}
-  })();
-  </script>
+  <link rel="icon" href="assets/images/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/logo.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/logo.png">
+  <meta name="theme-color" content="#ffffff">
 </head>
 <body>
   <header class="site-header">
@@ -48,158 +33,43 @@
   </header>
 
   <main class="container">
-    <section style="padding:24px 0;">
-      <div style="display:flex;gap:16px;align-items:center;margin-bottom:12px">
-        <div class="avatar-preview-small" style="width:120px;height:120px;border-radius:50%;overflow:hidden;border:1px solid var(--border)">
-          <img id="user-avatar" src="assets/images/default4.png" alt="当前头像" style="width:100%;height:100%;object-fit:cover;display:block">
+    <section class="page-section">
+      <div class="profile-header">
+        <div class="profile-avatar">
+          <img id="user-avatar" src="assets/images/default4.png" alt="当前头像">
         </div>
         <div>
           <div><strong id="user-name">用户</strong></div>
-          <div id="user-id" style="color:var(--muted);margin-top:6px">ID: -</div>
+          <div id="user-id" class="profile-id">ID: -</div>
         </div>
       </div>
 
-      <hr style="margin:18px 0;border-color:var(--border)">
+      <hr class="profile-divider">
 
       <form id="avatar-form">
-        <div style="margin-bottom:8px">
-          <label>上传头像： <input id="user-avatar-file" type="file" accept="image/*"></label>
+        <div class="field">
+          <label for="user-avatar-file">上传头像：</label>
+          <input id="user-avatar-file" type="file" accept="image/*">
         </div>
-        <div style="margin-bottom:8px">
-          <label>或使用图片 URL：<br>
-            <input id="user-avatar-url" type="url" placeholder="https://..." style="width:100%">
-          </label>
+        <div class="field">
+          <label for="user-avatar-url">或使用图片 URL：</label>
+          <input id="user-avatar-url" type="url" placeholder="https://...">
         </div>
-        <div style="display:flex;gap:8px;margin-top:8px">
+        <div class="profile-actions">
           <button type="button" id="btn-avatar-save">保存头像</button>
           <button type="button" id="btn-avatar-clear">清除为默认</button>
           <button type="button" id="btn-back">返回首页</button>
         </div>
-        <div id="avatar-msg" class="help" style="margin-top:8px;color:var(--muted)"></div>
-        <div id="default-avatars" class="default-avatars" aria-label="默认头像列表" role="list" style="margin-top:12px"></div>
+        <div id="avatar-msg" class="status-line form-note"></div>
+        <div id="default-avatars" class="default-avatars" aria-label="默认头像列表" role="list"></div>
       </form>
 
     </section>
   </main>
 
   <footer class="site-footer"><div class="container">© 2025 KMNHZ-China</div></footer>
+  <script src="js/config.js"></script>
   <script src="js/main.js"></script>
-  <script>
-    (function(){
-      const user = window.getStoredUser();
-      const avatarImg = document.getElementById('user-avatar');
-      const nameEl = document.getElementById('user-name');
-      const idEl = document.getElementById('user-id');
-      const fileInput = document.getElementById('user-avatar-file');
-      const urlInput = document.getElementById('user-avatar-url');
-      const msg = document.getElementById('avatar-msg');
-      const btnSave = document.getElementById('btn-avatar-save');
-      const btnClear = document.getElementById('btn-avatar-clear');
-      const btnBack = document.getElementById('btn-back');
-
-      if(!user){
-        // 若未登录，重定向到登录页
-        location.href = 'auth.html#login';
-        return;
-      }
-      if(avatarImg) avatarImg.src = user.avatar || (window.defaultAvatars && window.defaultAvatars[0]) || 'assets/images/default4.png';
-      if(nameEl) nameEl.textContent = user.name || user.id || '用户';
-      if(idEl) idEl.textContent = 'ID: ' + (user.id || '-');
-
-      // 预览 URL 输入
-      if(urlInput){
-        urlInput.addEventListener('input', ()=>{
-          const v = (urlInput.value||'').trim();
-          if(v && /^https?:\/\//i.test(v) && avatarImg) avatarImg.src = v;
-        });
-      }
-
-      // 本地文件预览（异步处理后会覆盖 preview）
-      if(fileInput){
-        fileInput.addEventListener('change', async ()=>{
-          const f = fileInput.files && fileInput.files[0];
-          if(!f) return;
-          if(msg) msg.textContent = '处理中…';
-          try{
-            const dataUrl = await window.processAvatarFile(f, { maxDim:256, maxBytes:150*1024 });
-            if(avatarImg) avatarImg.src = dataUrl;
-            if(msg) msg.textContent = '已准备好，点击保存以应用';
-          }catch(err){ if(msg) msg.textContent = '头像处理失败: ' + (err && err.message); }
-        });
-      }
-
-      if(btnSave){
-        btnSave.addEventListener('click', async ()=>{
-          if(msg) msg.textContent = '';
-          // 优先使用文件处理；其次检查 URL；最后检查是否选择了默认头像缩略
-          const f = fileInput && fileInput.files && fileInput.files[0];
-          try{
-            let finalSrc = '';
-            if(f){ if(msg) msg.textContent = '正在生成头像…'; finalSrc = await window.processAvatarFile(f, { maxDim:256, maxBytes:150*1024 }); }
-            else {
-              const v = (urlInput && urlInput.value||'').trim();
-              if(v && /^https?:\/\//i.test(v)) finalSrc = v;
-            }
-            // 若仍无 finalSrc，则查看是否选中了默认头像（缩略图）
-            if(!finalSrc){
-              const container = document.getElementById('default-avatars');
-              if(container){
-                const sel = container.querySelector('.default-avatar-thumb.selected');
-                if(sel){
-                  const img = sel.querySelector('img');
-                  if(img && img.src) finalSrc = img.src;
-                }
-              }
-            }
-            if(!finalSrc) { if(msg) msg.textContent = '请先选择上传文件、填写有效 URL 或选择默认头像。'; return; }
-            const cur = window.getStoredUser() || { id: 'user' };
-            cur.avatar = finalSrc;
-            window.loginUser(cur);
-            // 立即更新页面与导航（保留在当前页）
-            if(typeof window.updateAuthUI === 'function') window.updateAuthUI();
-            // 清理临时输入并取消缩略图选中
-            try{ if(fileInput) fileInput.value = ''; if(urlInput) urlInput.value = ''; const container = document.getElementById('default-avatars'); if(container) container.querySelectorAll('.default-avatar-thumb').forEach(n=>n.classList.remove('selected')); }catch(e){}
-            if(msg) msg.textContent = '已保存。';
-          }catch(err){ if(msg) msg.textContent = '保存失败: ' + (err && err.message); }
-        });
-      }
-
-      if(btnClear){
-        btnClear.addEventListener('click', ()=>{
-          const cur = window.getStoredUser() || { id: 'user' };
-          cur.avatar = (window.defaultAvatars && window.defaultAvatars.length) ? window.defaultAvatars[Math.floor(Math.random()*window.defaultAvatars.length)] : 'assets/images/default4.png';
-          window.loginUser(cur);
-          if(avatarImg) avatarImg.src = cur.avatar;
-          if(msg) msg.textContent = '已重置为默认头像。';
-        });
-      }
-
-      // 渲染默认头像选择缩略图
-      (function renderDefaultAvatars(){
-        const container = document.getElementById('default-avatars');
-        if(!container) return;
-        container.innerHTML = '';
-        const list = window.defaultAvatars || [];
-        list.forEach((src, idx)=>{
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'default-avatar-thumb';
-          btn.setAttribute('role','listitem');
-          btn.title = '选择默认头像';
-          btn.innerHTML = `<img src="${src}" alt="默认头像 ${idx+1}">`;
-          btn.addEventListener('click', ()=>{
-            // 取消其他选中样式
-            container.querySelectorAll('.default-avatar-thumb').forEach(n=>n.classList.remove('selected'));
-            btn.classList.add('selected');
-            if(avatarImg) avatarImg.src = src;
-            if(msg) msg.textContent = '已选择默认头像，点击保存以应用。';
-          });
-          container.appendChild(btn);
-        });
-      })();
-
-      if(btnBack) btnBack.addEventListener('click', ()=>{ location.href = 'index.html'; });
-    })();
-  </script>
+  <script src="js/profile.js"></script>
 </body>
 </html>
