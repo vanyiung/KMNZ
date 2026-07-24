@@ -32,23 +32,7 @@
     └── theme.js            # 主题初始化和切换
 ```
 
-## 本地预览
 
-直接打开 `index.html` 可以看页面。歌回导入和部分浏览器能力建议用本地服务器：
-
-```powershell
-python -m http.server 8080
-```
-
-然后访问 `http://localhost:8080/`。
-
-## 配置
-
-`js/config.js` 里只保留安全默认值。不要把私密代理 key 写进前端代码；静态站点里的 JS 会被所有访问者看到。
-
-Firebase 仍兼容 `window.FIREBASE_CONFIG`。如果要接 Firebase，可以在 `js/config.js` 的 `firebaseConfig` 中填公开的 Web App 配置。
-
-歌回页默认使用公开 CORS 代理兜底。如果你有自己的代理，把代理地址配置到 `KMNZ_CONFIG.songcoverProxy`，但不要把后端密钥放在这个项目里。
 
 <p align="center">
   <img src="https://count.getloli.com/get/@vanyiung.KMNZ" />
