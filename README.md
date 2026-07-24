@@ -2,6 +2,10 @@
 
 这是一个纯静态站点，可以直接打开 HTML，也可以用本地静态服务器预览。
 
+## 页面预览
+
+![KMNZ 资料站首页预览](assets/images/kmnz-homepage-preview-20260724.png)
+
 ## 目录结构
 
 ```text
