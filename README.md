@@ -49,3 +49,7 @@ python -m http.server 8080
 Firebase 仍兼容 `window.FIREBASE_CONFIG`。如果要接 Firebase，可以在 `js/config.js` 的 `firebaseConfig` 中填公开的 Web App 配置。
 
 歌回页默认使用公开 CORS 代理兜底。如果你有自己的代理，把代理地址配置到 `KMNZ_CONFIG.songcoverProxy`，但不要把后端密钥放在这个项目里。
+
+<p align="center">
+  <img src="https://count.getloli.com/get/@vanyiung.KMNZ" />
+</p>
